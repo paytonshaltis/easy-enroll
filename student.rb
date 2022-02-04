@@ -1,9 +1,12 @@
 # Student class for representing students
 class Student
 
-    # Attributes for a single Student.
+    # Read / write instance variables from CSV.
     attr_accessor :student_id, :student_year, :courses_taken, 
       :semesters_left, :num_prefs, :prefs
+
+    # Read / write instance variables NOT from CSV.
+    attr_accessor :enrolled_courses, :reason
   
     # Initializes the Student using a row from the CSV file.
     def initialize(student_info)
@@ -17,6 +20,10 @@ class Student
       # Needs formatting
       @courses_taken = split_taken(student_info[2])
       @prefs = merge_prefs(student_info[5], student_info[6], student_info[7])
+
+      # Need to set up some variables NOT from CSV file.
+      enrolled_courses = ""
+      reason = ""
 
     end
 
@@ -60,6 +67,7 @@ class Student
     # The toString() method for neatly printing students. Prints
     # in CSV format for writing to output files.
     def to_s()
+      "#{@student_id}, #{@enrolled_courses}, #{reason}"
     end
 
   end
