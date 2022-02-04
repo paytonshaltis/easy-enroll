@@ -1,6 +1,9 @@
 # Student class for representing students
 class Student
 
+    # Class variables for all Student objects.
+    @@overenrollments = 0
+
     # Read / write instance variables from CSV.
     attr_accessor :student_id, :student_year, :courses_taken, 
       :semesters_left, :num_prefs, :prefs
@@ -14,16 +17,21 @@ class Student
       # Straight from CSV file
       @student_id = student_info[0]
       @student_year = student_info[1]
-      @semesters_left = student_info[3]
-      @num_prefs = student_info[4]
+      @semesters_left = student_info[3].to_i()
+      @num_prefs = student_info[4].to_i()
 
       # Needs formatting
       @courses_taken = split_taken(student_info[2])
       @prefs = merge_prefs(student_info[5], student_info[6], student_info[7])
 
       # Need to set up some variables NOT from CSV file.
-      enrolled_courses = ""
-      reason = ""
+      @enrolled_courses = ""
+      @reason = ""
+
+      # Plan ahead for overenrollments
+      if (@prefs.size() > @num_prefs)
+        @@overenrollments += (@prefs.size() - @num_prefs)
+      end
 
     end
 
@@ -46,6 +54,11 @@ class Student
         end
       }
       filtered
+    end
+
+    # Returns the number of overenrollments for all students.
+    def Student.overenrollments()
+      @@overenrollments
     end
 
     # 'Enrolls' a student into a course. Adds the course to the 
