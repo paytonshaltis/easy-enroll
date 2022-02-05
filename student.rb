@@ -6,7 +6,7 @@ class Student
 
     # Read / write instance variables from CSV.
     attr_accessor :student_id, :student_year, :courses_taken, 
-      :semesters_left, :num_prefs, :prefs
+      :semesters_left, :num_requests, :prefs
 
     # Read / write instance variables NOT from CSV.
     attr_accessor :enrolled_courses, :reasons, :priority,
@@ -15,13 +15,13 @@ class Student
     # Initializes the Student using a row from the CSV file.
     def initialize(student_info)
 
-      # Straight from CSV file
+      # Straight from CSV file.
       @student_id = student_info[0]
       @student_year = student_info[1]
       @semesters_left = student_info[3].to_i()
-      @num_prefs = student_info[4].to_i()
+      @num_requests = student_info[4].to_i()
 
-      # Needs formatting
+      # Needs formatting.
       @courses_taken = split_taken(student_info[2])
       @prefs = merge_prefs(student_info[5], student_info[6], student_info[7])
 
@@ -29,11 +29,15 @@ class Student
       @enrolled_courses = []
       @reasons = []
       calculate_priority()
+      enroll_all_courses()
 
-      # Plan ahead for overenrollments
-      update_overenrolled()
-      if (@prefs.size() > @num_prefs)
-        @@overenrollments += (@prefs.size() - @num_prefs)
+      # We can determine if a student will be overenrolled before even
+      # enrolling them, and increase @@overenrollments accordingly.
+      if (@prefs.size() > @num_requests)
+        @@overenrollments += (@prefs.size() - @num_requests)
+        @overenrolled = true
+      else
+        @overenrolled = false
       end
 
     end
@@ -102,29 +106,58 @@ class Student
     end
 
     # Updates the @overenrolled instance variable by checking to
-    # see if the student is still overenrolled.
+    # see if the student is still enrolled in too many classes.
     def update_overenrolled()
-      if (@prefs.size() > @num_prefs)
+      if (@enrolled_courses.size() > @num_requests)
         @overenrolled = true
       else
         @overenrolled = false
       end
     end
 
-    # 'Enrolls' a student into a course. Adds the course to the 
-    # array of courses the student is currently enrolled in.
-    def enroll(course)
+    # 'Enrolls' a student into all of their course preferences. This is
+    # done as students are being created.
+    def enroll_all_courses()
     end
 
-    # 'Unenrolls' a student into a course. Different from being
+    # 'Enrolls' a student into courses, given as an array or a single
+    # string. Adds the course to the array of courses the student is 
+    # currently enrolled in.
+    def enroll(courses)
+      
+      # Courses is an array.
+      if courses.class() == Array
+        courses.each { |course|
+          @enrolled_courses.push(course)
+          puts "#{@student_id} enrolled in #{course}!"
+        }
+      
+      # Courses is a string.
+      elsif courses.class() == String
+        @enrolled_courses.push(courses)
+          puts "#{@student_id} enrolled in #{courses}!"
+      end
+
+    end
+
+    # 'Unenrolls' a student from a course. Different from being
     # 'kicked'; unenrolling is used to manage students who
-    # are enrolled in too many courses.
+    # are enrolled in too many courses from the start.
     def unenroll(course)
+
+      # Remove the course from the student's enrollment list.
+      @enrolled_courses.delete(course)
+
+      # Need to see if the student is still overenrolled, and we
+      # always decrease the overall @@overenrollments.
+      update_overenrolled()
+      @@overenrollments -= 1
+
     end
 
     # 'Kicks' a student from a course. This action is performed
     # when classes exceed their maximum and is based on priority.
-    def kick(course)
+    def kick(course, reason)
     end
 
     # The toString() method for neatly printing students. Prints
