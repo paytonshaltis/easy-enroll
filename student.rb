@@ -9,7 +9,7 @@ class Student
       :semesters_left, :num_prefs, :prefs
 
     # Read / write instance variables NOT from CSV.
-    attr_accessor :enrolled_courses, :reason
+    attr_accessor :enrolled_courses, :reasons
   
     # Initializes the Student using a row from the CSV file.
     def initialize(student_info)
@@ -25,8 +25,8 @@ class Student
       @prefs = merge_prefs(student_info[5], student_info[6], student_info[7])
 
       # Need to set up some variables NOT from CSV file.
-      @enrolled_courses = ""
-      @reason = ""
+      @enrolled_courses = []
+      @reasons = []
 
       # Plan ahead for overenrollments
       if (@prefs.size() > @num_prefs)
@@ -80,7 +80,31 @@ class Student
     # The toString() method for neatly printing students. Prints
     # in CSV format for writing to output files.
     def to_s()
-      "#{@student_id}, #{@enrolled_courses}, #{reason}"
+      enrolled_string = ""
+      reason_string = ""
+
+      # Generate the string of enrolled courses or "None".
+      @enrolled_courses.each { |course|
+        enrolled_string += "#{course}, "
+      }
+      if not enrolled_string == ""
+        enrolled_string = enrolled_string.chop.chop
+      else
+        enrolled_string = "None"
+      end
+
+      # Generate the string of reasons or "N/A".
+      @reasons.each { |reason|
+        reason_string += "#{reason} "
+      }
+      if not reason_string == ""
+        reason_string = reason_string.chop
+      else
+        reason_string = "N/A"
+      end
+
+      # Print the CSV-formatted Student string.
+      "#{@student_id},\"#{enrolled_string}\",\"#{reason_string}\""
     end
 
   end
