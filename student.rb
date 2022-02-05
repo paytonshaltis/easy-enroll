@@ -9,7 +9,8 @@ class Student
       :semesters_left, :num_prefs, :prefs
 
     # Read / write instance variables NOT from CSV.
-    attr_accessor :enrolled_courses, :reasons, :priority
+    attr_accessor :enrolled_courses, :reasons, :priority,
+      :overenrolled
   
     # Initializes the Student using a row from the CSV file.
     def initialize(student_info)
@@ -30,13 +31,14 @@ class Student
       calculate_priority()
 
       # Plan ahead for overenrollments
+      update_overenrolled()
       if (@prefs.size() > @num_prefs)
         @@overenrollments += (@prefs.size() - @num_prefs)
       end
 
     end
 
-    # Returns an array of Strings representing courses taken by
+    # Returns an array of strings representing courses taken by
     # the student in the past.
     def split_taken(courses_taken)
       if courses_taken
@@ -46,7 +48,7 @@ class Student
       end
     end
 
-    # Returns an array of Strings representing courses preferred
+    # Returns an array of strings representing courses preferred
     # by the student, omitting the "N/A"s.
     def merge_prefs(pref1, pref2, pref3)
       unfiltered = [pref1, pref2, pref3]
@@ -97,6 +99,16 @@ class Student
     # Returns the number of overenrollments for all students.
     def Student.overenrollments()
       @@overenrollments
+    end
+
+    # Updates the @overenrolled instance variable by checking to
+    # see if the student is still overenrolled.
+    def update_overenrolled()
+      if (@prefs.size() > @num_prefs)
+        @overenrolled = true
+      else
+        @overenrolled = false
+      end
     end
 
     # 'Enrolls' a student into a course. Adds the course to the 
