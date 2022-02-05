@@ -105,14 +105,14 @@ class Student
     end
 
     # 'Unenrolls' a student into a course. Different from being
-    # 'dropped'; unenrolling is used to manage students who
+    # 'kicked'; unenrolling is used to manage students who
     # are enrolled in too many courses.
     def unenroll(course)
     end
 
-    # 'Drops' a student from a course. This action is performed
+    # 'Kicks' a student from a course. This action is performed
     # when classes exceed their maximum and is based on priority.
-    def drop(course)
+    def kick(course)
     end
 
     # The toString() method for neatly printing students. Prints
