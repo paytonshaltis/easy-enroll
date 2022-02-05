@@ -1,4 +1,4 @@
-# Student class for representing students
+# Student class for representing students.
 class Student
 
     # Class variables for all Student objects.
