@@ -140,19 +140,29 @@ class Student
 
     end
 
-    # 'Unenrolls' a student from a course. Different from being
+    # 'Unenrolls' a student from a course if they are still
+    # overenrolled. Returns true if the student was unenrolled,
+    # false if the student was not. Different from being
     # 'kicked'; unenrolling is used to manage students who
     # are enrolled in too many courses from the start.
     def unenroll(course)
 
-      # Remove the course from the student's enrollment list.
-      @enrolled_courses.delete(course)
+      # Ensure the student is still overenrolled
+      if @overenrolled
+        # Remove the course from the student's enrollment list.
+        @enrolled_courses.delete(course)
 
-      # Need to see if the student is still overenrolled, and we
-      # always decrease the overall @@overenrollments.
-      update_overenrolled()
-      @@overenrollments -= 1
+        # Need to see if the student is still overenrolled, and we
+        # always decrease the overall @@overenrollments.
+        update_overenrolled()
+        @@overenrollments -= 1
 
+        # Indicates that the student was unenrolled.
+        return true
+      end
+
+      # Indicates that this method call had no effect.
+      return false
     end
 
     # 'Kicks' a student from a course. This action is performed
