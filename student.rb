@@ -9,7 +9,7 @@ class Student
       :semesters_left, :num_prefs, :prefs
 
     # Read / write instance variables NOT from CSV.
-    attr_accessor :enrolled_courses, :reasons
+    attr_accessor :enrolled_courses, :reasons, :priority
   
     # Initializes the Student using a row from the CSV file.
     def initialize(student_info)
@@ -27,6 +27,7 @@ class Student
       # Need to set up some variables NOT from CSV file.
       @enrolled_courses = []
       @reasons = []
+      calculate_priority()
 
       # Plan ahead for overenrollments
       if (@prefs.size() > @num_prefs)
@@ -40,6 +41,8 @@ class Student
     def split_taken(courses_taken)
       if courses_taken
         return courses_taken.split(", ")
+      else
+        return []
       end
     end
 
@@ -54,6 +57,41 @@ class Student
         end
       }
       filtered
+    end
+
+    # Returns the priority level of a student based on the 
+    # factors described in the assignment. Returns an integer.
+    def calculate_priority()
+    
+      # A higher result indicates a higher priority for classes.
+      @priority = 0
+
+      # The first digit represents the class level.
+      case @student_year
+      when "Senior"
+        @priority += 40000
+      when "Junior"
+        @priority += 30000
+      when "Sophomore"
+        @priority += 20000
+      when "First Year"
+        @priority += 10000
+      end
+
+      # The second digit represents semesters taken.
+      @priority += (8 - @semesters_left) * 1000
+
+      # The third and fourth digits represent classes taken.
+      @priority += @courses_taken.size() * 10
+
+      # TODO
+      # The fifth digit represents if the studen selected the
+      # maximum number of courses that they could.
+      # if @prefs.size() == 3 || (@prefs.size() + @courses_taken() == Course.total_courses_offered)
+      #   @priority += 3
+      # else
+      #   @priority += (@prefs.size())
+
     end
 
     # Returns the number of overenrollments for all students.
