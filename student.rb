@@ -6,8 +6,7 @@ class Student
     :semesters_left, :num_requests, :prefs
 
   # Read / write instance variables NOT from CSV.
-  attr_accessor :enrolled_courses, :reasons, :priority,
-    :overenrolled
+  attr_accessor :enrolled_courses, :reasons, :priority
 
   # Initializes the Student using a row from the CSV file.
   def initialize(student_info)
@@ -26,10 +25,6 @@ class Student
     @enrolled_courses = []
     @reasons = []
     calculate_priority()
-
-    # We can determine if a student will be overenrolled before even
-    # enrolling them.
-    @overenrolled = @prefs.size() > @num_requests
 
   end
 
@@ -101,10 +96,10 @@ class Student
     return count
   end
 
-  # Updates the @overenrolled instance variable by checking to
-  # see if the student is still enrolled in too many classes.
-  def update_overenrolled()
-    @overenrolled = @enrolled_courses.size() > @num_requests
+  # Returns true if the student is still enrolled in more classes
+  # than they initially requested.
+  def overenrolled()
+    @enrolled_courses.size() > @num_requests
   end
 
   # 'Enrolls' a student into courses, given as an array or a single
@@ -133,30 +128,28 @@ class Student
   end
 
   # 'Unenrolls' a student from a course if they are still
-  # overenrolled. Returns true if the student was unenrolled,
-  # false if the student was not. Different from being
-  # 'kicked'; unenrolling is used to manage students who
-  # are enrolled in too many courses from the start.
+  # overenrolled and enrolled in this course. Returns true 
+  # if the student was unenrolled, false if the student was 
+  # not. Different from being 'kicked'; unenrolling is used 
+  # to manage students who are enrolled in too many courses 
+  # from the start.
   def unenroll(course, courses_hash)
 
     # Ensure the student is still overenrolled and in this course
-    if @overenrolled && @enrolled_courses.include?(course)
+    if overenrolled() && @enrolled_courses.include?(course)
 
-      # Remove the course from the student's enrollment array.
-      being_deleted = @enrolled_courses.delete(course)
-
-      # Remove the student from the course's enrolled students array.
+      # Remove the course and student from one another.
+      @enrolled_courses.delete(course)
       courses_hash[course].enrolled_students().delete(self)
-
-      # Need to see if the student is still overenrolled.
-      update_overenrolled()
 
       # Indicates that the student was unenrolled.
       return true
+
     end
 
     # Indicates that this method call had no effect.
     return false
+
   end
 
   # 'Drops' a student from a course. This action is performed
@@ -168,9 +161,6 @@ class Student
 
     # Remove the class from the student's enrollments.
     puts "#{@student_id} was dropped from #{@enrolled_courses.delete(course)}"
-
-    # Update the student's overenrolled status.
-    update_overenrolled()
 
   end
 
