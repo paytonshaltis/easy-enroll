@@ -116,21 +116,24 @@ class Student
 
     # 'Enrolls' a student into courses, given as an array or a single
     # string. Adds the course to the array of courses the student is 
-    # currently enrolled in.
+    # currently enrolled in. A reference to this student is also stored
+    # in the enrolled_students array within that class.
     def enroll(courses, courses_hash)
 
       # Courses is an array.
       if courses.class() == Array
         courses.each { |course|
           @enrolled_courses.push(course)
-          courses_hash[course].enrolled_students.push(self)
+          courses_hash[course].enrolled_students().push(self)
+          courses_hash[course].num_overenrolled += ( @overenrolled ? 1 : 0)
           puts "#{@student_id} enrolled in #{course}!"
         }
       
       # Courses is a string.
       elsif courses.class() == String
         @enrolled_courses.push(courses)
-        courses_hash[course].enrolled_students.push(self)
+        courses_hash[course].enrolled_students().push(self)
+        courses_hash[course].num_overenrolled += ( @overenrolled ? 1 : 0)
         puts "#{@student_id} enrolled in #{courses}!"
       end
 
@@ -141,12 +144,17 @@ class Student
     # false if the student was not. Different from being
     # 'kicked'; unenrolling is used to manage students who
     # are enrolled in too many courses from the start.
-    def unenroll(course)
+    def unenroll(course, courses_hash)
 
       # Ensure the student is still overenrolled
       if @overenrolled
-        # Remove the course from the student's enrollment list.
+
+        # Remove the course from the student's enrollment array.
         @enrolled_courses.delete(course)
+
+        # Remove the student from the course's enrolled students array.
+        courses_hash[course].enrolled_students().delete(self)
+        courses_hash[course].num_overenrolled -= 1
 
         # Need to see if the student is still overenrolled, and we
         # always decrease the overall @@overenrollments.
