@@ -8,8 +8,7 @@ class Course
   attr_accessor :course_number, :init_num_sections, :min, :max
 
   # Read / write instance variables NOT from CSV.
-  attr_accessor :total_min, :total_max, :curr_num_sections,
-    :enrolled_students
+  attr_accessor :curr_num_sections, :enrolled_students
 
   # Initializes a Course using a row from the CSV file.
   def initialize(course_info)
@@ -23,16 +22,18 @@ class Course
 
     # Need to calculate other course data.
     @enrolled_students = []
-    update_totals()
-
     @@total_courses += 1
 
   end
 
-  # Updates total min and max according to curr_num_sections.
-  def update_totals()
-    @total_min = @curr_num_sections * @min
-    @total_max = @curr_num_sections * @max
+  # Returns the total minimum students across all course sections.
+  def total_min()
+    @curr_num_sections * @min
+  end
+
+  # Returns the total maximum students across all course sections.
+  def total_max()
+    @curr_num_sections * @max
   end
 
   # Returns the total number of courses available this semester.
@@ -46,9 +47,8 @@ class Course
   # and all students dropped.
   def drop_sections()
   
-    while enrolled_students.size() < total_min
+    while enrolled_students.size() < total_min()
       @curr_num_sections -= 1
-      update_totals()
       puts "A section of #{course_number} was dropped due to low enrollment."
     end
 
@@ -56,18 +56,15 @@ class Course
   
   end
 
-  # Drops all students from the course in the case that 0 sections can
-  # run. The course is deleted from each student's array of courses.
+  # Drops all students from the course in the case that no sections run.
   def drop_all_students(courses_hash)
     @enrolled_students.each { |student|
       student.drop(self.course_number(), "No sections of #{self.course_number()} could run because they could not be filled.", courses_hash)
     }
   end
 
-  # Returns the number of overenrolled students currently enrolled
-  # in this course.
-  def num_overenrolled()
-    
+  # Returns the number of overenrolled students in this course.
+  def num_overenrolled_students()
     count = 0
     enrolled_students.each { |student|
       if student.overenrolled()

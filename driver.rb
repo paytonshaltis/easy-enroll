@@ -60,7 +60,7 @@ def main()
 
   # Try unenrolling students from courses where min < C < max
 
-  # Try unenrolling students from courses where C < min < max (sort by max num_overenrolled)
+  # Try unenrolling students from courses where C < min < max (sort by max num_overenrolled_students)
 # end
 
 # Need to kick students from any classes above their total max.
@@ -82,7 +82,7 @@ def main()
 
   # Print all of the students in each course.
   courses.each { |course|
-    puts "#{course.course_number()}, #{course.enrolled_students().size()} total, #{course.total_min} total min, #{course.total_max} total max, #{course.num_overenrolled()} overenrolled, "
+    puts "#{course.course_number()}, #{course.enrolled_students().size()} total, #{course.total_min} total min, #{course.total_max} total max, #{course.num_overenrolled_students()} overenrolled, "
     course.enrolled_students.each { |student|
       puts student.student_id
     }
@@ -99,7 +99,7 @@ def main()
 
   # Print all of the students in each course.
   courses.each { |course|
-    puts "#{course.course_number()}, #{course.enrolled_students().size()} total, #{course.total_min} total min, #{course.total_max} total max, #{course.num_overenrolled()} overenrolled, "
+    puts "#{course.course_number()}, #{course.enrolled_students().size()} total, #{course.total_min} total min, #{course.total_max} total max, #{course.num_overenrolled_students()} overenrolled, "
     course.enrolled_students.each { |student|
       puts student.student_id
     }
@@ -116,7 +116,7 @@ def main()
 
   # Print all of the students in each course.
   courses.each { |course|
-    puts "#{course.course_number()}, #{course.num_overenrolled()} overenrolled:"
+    puts "#{course.course_number()}, #{course.num_overenrolled_students()} overenrolled:"
     course.enrolled_students.each { |student|
       puts student.student_id
     }
@@ -133,7 +133,7 @@ def main()
 
   # Print all of the students in each course.
   courses.each { |course|
-    puts "#{course.course_number()}, #{course.num_overenrolled()} overenrolled:"
+    puts "#{course.course_number()}, #{course.num_overenrolled_students()} overenrolled:"
     course.enrolled_students.each { |student|
       puts student.student_id
     }
