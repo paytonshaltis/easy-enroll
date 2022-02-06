@@ -175,7 +175,27 @@ class Student
 
   # 'Kicks' a student from a course. This action is performed
   # when classes exceed their maximum and is based on priority.
-  def kick(course, reason)
+  def kick(course, reason, courses_hash)
+    
+    # Add the reason for not getting into the class.
+    @reasons.push(reason)
+
+    # Remove the class from the student's enrollments.
+    puts "#{@student_id} was kicked from #{@enrolled_courses.delete(course)}"
+
+    # Update the student's overenrolled status.
+    temp = @overenrolled
+    update_overenrolled()
+
+    # If they went from overenrolled to not, indicate this in the Student
+    # class, but also to all of their other enrolled classes.
+    if temp && (not @overenrolled)
+      @@overenrollments -= 1
+      @enrolled_courses.each { |course|
+        courses_hash[course].num_overenrolled -= 1
+      }
+    end
+
   end
 
   # The toString() method for neatly printing students. Prints
