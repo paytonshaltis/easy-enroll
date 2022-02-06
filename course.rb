@@ -1,6 +1,9 @@
 # Course class for representing courses.
 class Course
 
+  # Class variables for all Course objects.
+  @@total_courses = 0
+
   # Read / write instance variables from CSV.
   attr_accessor :course_number, :num_sections, :min, :max
 
@@ -22,12 +25,19 @@ class Course
     @num_overenrolled = 0
     update_totals()
 
+    @@total_courses += 1
+
   end
 
   # Updates total min and max according to num_sections.
   def update_totals()
     @total_min = @num_sections * @min
     @total_max = @num_sections * @max
+  end
+
+  # Returns the total number of courses available this semester.
+  def Course.total_courses()
+    @@total_courses
   end
 
 end
