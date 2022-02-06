@@ -128,7 +128,6 @@ class Student
         # Add reference to the course, update its @num_overenrolled.
         courses_hash[course].enrolled_students().push(self)
         courses_hash[course].num_overenrolled += ( @overenrolled ? 1 : 0)
-        puts "#{@student_id} enrolled in #{course}!"
       }
     
     # Courses is a string.
@@ -138,7 +137,6 @@ class Student
       # Add reference to the course, update its @num_overenrolled.
       courses_hash[course].enrolled_students().push(self)
       courses_hash[course].num_overenrolled += ( @overenrolled ? 1 : 0)
-      puts "#{@student_id} enrolled in #{courses}!"
     end
 
   end
@@ -150,20 +148,27 @@ class Student
   # are enrolled in too many courses from the start.
   def unenroll(course, courses_hash)
 
-    # Ensure the student is still overenrolled
-    if @overenrolled
+    # Ensure the student is still overenrolled and in this course
+    if @overenrolled && @enrolled_courses.include?(course)
 
       # Remove the course from the student's enrollment array.
       @enrolled_courses.delete(course)
 
       # Remove the student from the course's enrolled students array.
       courses_hash[course].enrolled_students().delete(self)
-      courses_hash[course].num_overenrolled -= 1
 
       # Need to see if the student is still overenrolled, and we
       # always decrease the overall @@overenrollments.
       update_overenrolled()
       @@overenrollments -= 1
+
+      # Need to update every course's overenrolled count that this 
+      # student belongs to if the student is no longer overenrolled.
+      if not @overenrolled
+        @enrolled_courses.each { |course|
+          courses_hash[course].num_overenrolled -= 1
+        }
+      end
 
       # Indicates that the student was unenrolled.
       return true
