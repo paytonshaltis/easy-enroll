@@ -1,9 +1,6 @@
 # Student class for representing students.
 class Student
 
-  # Class variables for all Student objects.
-  @@overenrollments = 0
-
   # Read / write instance variables from CSV.
   attr_accessor :student_id, :student_year, :courses_taken, 
     :semesters_left, :num_requests, :prefs
@@ -31,13 +28,8 @@ class Student
     calculate_priority()
 
     # We can determine if a student will be overenrolled before even
-    # enrolling them, and increase @@overenrollments accordingly.
-    if (@prefs.size() > @num_requests)
-      @@overenrollments += (@prefs.size() - @num_requests)
-      @overenrolled = true
-    else
-      @overenrolled = false
-    end
+    # enrolling them.
+    @overenrolled = @prefs.size() > @num_requests
 
   end
 
@@ -100,18 +92,19 @@ class Student
   end
 
   # Returns the number of overenrollments for all students.
-  def Student.overenrollments()
-    @@overenrollments
+  def Student.overenrollments(students)
+    count = 0
+    students.each { |student|
+      difference = student.enrolled_courses().size() - student.num_requests()
+      count += (difference > 0) ? difference : 0
+    }
+    return count
   end
 
   # Updates the @overenrolled instance variable by checking to
   # see if the student is still enrolled in too many classes.
   def update_overenrolled()
-    if (@enrolled_courses.size() > @num_requests)
-      @overenrolled = true
-    else
-      @overenrolled = false
-    end
+    @overenrolled = @enrolled_courses.size() > @num_requests
   end
 
   # 'Enrolls' a student into courses, given as an array or a single
@@ -125,18 +118,16 @@ class Student
       courses.each { |course|
         @enrolled_courses.push(course)
 
-        # Add reference to the course, update its @num_overenrolled.
+        # Add reference to the course.
         courses_hash[course].enrolled_students().push(self)
-        courses_hash[course].num_overenrolled += ( @overenrolled ? 1 : 0)
       }
     
     # Courses is a string.
     elsif courses.class() == String
       @enrolled_courses.push(courses)
 
-      # Add reference to the course, update its @num_overenrolled.
+      # Add reference to the course.
       courses_hash[course].enrolled_students().push(self)
-      courses_hash[course].num_overenrolled += ( @overenrolled ? 1 : 0)
     end
 
   end
@@ -152,23 +143,13 @@ class Student
     if @overenrolled && @enrolled_courses.include?(course)
 
       # Remove the course from the student's enrollment array.
-      @enrolled_courses.delete(course)
+      being_deleted = @enrolled_courses.delete(course)
 
       # Remove the student from the course's enrolled students array.
       courses_hash[course].enrolled_students().delete(self)
 
-      # Need to see if the student is still overenrolled, and we
-      # always decrease the overall @@overenrollments.
+      # Need to see if the student is still overenrolled.
       update_overenrolled()
-      @@overenrollments -= 1
-
-      # Need to update every course's overenrolled count that this 
-      # student belongs to if the student is no longer overenrolled.
-      if not @overenrolled
-        @enrolled_courses.each { |course|
-          courses_hash[course].num_overenrolled -= 1
-        }
-      end
 
       # Indicates that the student was unenrolled.
       return true
@@ -179,7 +160,7 @@ class Student
   end
 
   # 'Drops' a student from a course. This action is performed
-  # when classes exceed their maximum and is based on priority.
+  # when all sections of a class are unable to be run.
   def drop(course, reason, courses_hash)
     
     # Add the reason for not getting into the class.
@@ -189,23 +170,7 @@ class Student
     puts "#{@student_id} was dropped from #{@enrolled_courses.delete(course)}"
 
     # Update the student's overenrolled status.
-    temp = @overenrolled
     update_overenrolled()
-
-    # If it was previously overenrolled, decrease the total count of
-    # student overenrollments.
-    if temp
-      puts "Decreasing total overenrollments!"
-      @@overenrollments -= 1
-      
-      # If it is no longer overenrolled, decrease the number of students
-      # overenrolled in each of its classes.
-      if not @overenrolled
-        @enrolled_courses.each { |course|
-          courses_hash[course].num_overenrolled -= 1
-        }
-      end
-    end
 
   end
 

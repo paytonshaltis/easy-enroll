@@ -9,7 +9,7 @@ class Course
 
   # Read / write instance variables NOT from CSV.
   attr_accessor :total_min, :total_max, :curr_num_sections,
-    :enrolled_students, :num_overenrolled
+    :enrolled_students
 
   # Initializes a Course using a row from the CSV file.
   def initialize(course_info)
@@ -23,7 +23,6 @@ class Course
 
     # Need to calculate other course data.
     @enrolled_students = []
-    @num_overenrolled = 0
     update_totals()
 
     @@total_courses += 1
@@ -58,12 +57,24 @@ class Course
   end
 
   # Drops all students from the course in the case that 0 sections can
-  # run. The course is deleted from each student's array of enrolled 
-  # courses, and update their overenrolled status.
+  # run. The course is deleted from each student's array of courses.
   def drop_all_students(courses_hash)
     @enrolled_students.each { |student|
       student.drop(self.course_number(), "No sections of #{self.course_number()} could run because they could not be filled.", courses_hash)
     }
+  end
+
+  # Returns the number of overenrolled students currently enrolled
+  # in this course.
+  def num_overenrolled()
+    
+    count = 0
+    enrolled_students.each { |student|
+      if student.overenrolled()
+        count += 1
+      end
+    }
+    return count
   end
 
 end

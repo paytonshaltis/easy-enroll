@@ -82,7 +82,7 @@ def main()
 
   # Print all of the students in each course.
   courses.each { |course|
-    puts "#{course.course_number()}, #{course.num_overenrolled()} overenrolled:"
+    puts "#{course.course_number()}, #{course.enrolled_students().size()} total, #{course.total_min} total min, #{course.total_max} total max, #{course.num_overenrolled()} overenrolled, "
     course.enrolled_students.each { |student|
       puts student.student_id
     }
@@ -93,16 +93,13 @@ def main()
     puts "Priority: #{student.priority}, Overenrolled: #{student.overenrolled}, Enrolled: #{student.enrolled_courses}, #{student.student_id}, #{student.student_year}, #{student.courses_taken}, #{student.semesters_left}, #{student.num_requests}, #{student.prefs}"
   }
 
-  puts Student.overenrollments
-  students.each { |s|
-    puts s
-  }
+  puts Student.overenrollments(students)
 
   students[19].unenroll("CSC 315", courses_hash)
 
   # Print all of the students in each course.
   courses.each { |course|
-    puts "#{course.course_number()}, #{course.num_overenrolled()} overenrolled:"
+    puts "#{course.course_number()}, #{course.enrolled_students().size()} total, #{course.total_min} total min, #{course.total_max} total max, #{course.num_overenrolled()} overenrolled, "
     course.enrolled_students.each { |student|
       puts student.student_id
     }
@@ -113,10 +110,7 @@ def main()
     puts "Priority: #{student.priority}, Overenrolled: #{student.overenrolled}, Enrolled: #{student.enrolled_courses}, #{student.student_id}, #{student.student_year}, #{student.courses_taken}, #{student.semesters_left}, #{student.num_requests}, #{student.prefs}"
   }
 
-  puts Student.overenrollments
-  students.each { |s|
-    puts s
-  }
+  puts Student.overenrollments(students)
 
   students[19].unenroll("CSC 355", courses_hash)
 
@@ -133,11 +127,24 @@ def main()
     puts "Priority: #{student.priority}, Overenrolled: #{student.overenrolled}, Enrolled: #{student.enrolled_courses}, #{student.student_id}, #{student.student_year}, #{student.courses_taken}, #{student.semesters_left}, #{student.num_requests}, #{student.prefs}"
   }
 
-  puts Student.overenrollments
-  students.each { |s|
-    puts s
+  puts Student.overenrollments(students)
+
+  students[19].unenroll("CSC 325", courses_hash)
+
+  # Print all of the students in each course.
+  courses.each { |course|
+    puts "#{course.course_number()}, #{course.num_overenrolled()} overenrolled:"
+    course.enrolled_students.each { |student|
+      puts student.student_id
+    }
   }
 
+
+  students.each { |student|
+    puts "Priority: #{student.priority}, Overenrolled: #{student.overenrolled}, Enrolled: #{student.enrolled_courses}, #{student.student_id}, #{student.student_year}, #{student.courses_taken}, #{student.semesters_left}, #{student.num_requests}, #{student.prefs}"
+  }
+
+  puts Student.overenrollments(students)
 
 
 end
