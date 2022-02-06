@@ -173,27 +173,33 @@ class Student
     return false
   end
 
-  # 'Kicks' a student from a course. This action is performed
+  # 'Drops' a student from a course. This action is performed
   # when classes exceed their maximum and is based on priority.
-  def kick(course, reason, courses_hash)
+  def drop(course, reason, courses_hash)
     
     # Add the reason for not getting into the class.
     @reasons.push(reason)
 
     # Remove the class from the student's enrollments.
-    puts "#{@student_id} was kicked from #{@enrolled_courses.delete(course)}"
+    puts "#{@student_id} was dropped from #{@enrolled_courses.delete(course)}"
 
     # Update the student's overenrolled status.
     temp = @overenrolled
     update_overenrolled()
 
-    # If they went from overenrolled to not, indicate this in the Student
-    # class, but also to all of their other enrolled classes.
-    if temp && (not @overenrolled)
+    # If it was previously overenrolled, decrease the total count of
+    # student overenrollments.
+    if temp
+      puts "Decreasing total overenrollments!"
       @@overenrollments -= 1
-      @enrolled_courses.each { |course|
-        courses_hash[course].num_overenrolled -= 1
-      }
+      
+      # If it is no longer overenrolled, decrease the number of students
+      # overenrolled in each of its classes.
+      if not @overenrolled
+        @enrolled_courses.each { |course|
+          courses_hash[course].num_overenrolled -= 1
+        }
+      end
     end
 
   end
@@ -216,6 +222,7 @@ class Student
 
     # Generate the string of reasons or "N/A".
     @reasons.each { |reason|
+      puts reason
       reason_string += "#{reason} "
     }
     if not reason_string == ""

@@ -62,7 +62,7 @@ class Course
   # courses, and update their overenrolled status.
   def drop_all_students(courses_hash)
     @enrolled_students.each { |student|
-      student.kick(self.course_number(), "No sections of #{self.course_number()} could run because they could not be filled.", courses_hash)
+      student.drop(self.course_number(), "No sections of #{self.course_number()} could run because they could not be filled.", courses_hash)
     }
   end
 
