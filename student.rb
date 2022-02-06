@@ -29,7 +29,6 @@ class Student
       @enrolled_courses = []
       @reasons = []
       calculate_priority()
-      enroll_all_courses()
 
       # We can determine if a student will be overenrolled before even
       # enrolling them, and increase @@overenrollments accordingly.
@@ -115,27 +114,24 @@ class Student
       end
     end
 
-    # 'Enrolls' a student into all of their course preferences. This is
-    # done as students are being created.
-    def enroll_all_courses()
-    end
-
     # 'Enrolls' a student into courses, given as an array or a single
     # string. Adds the course to the array of courses the student is 
     # currently enrolled in.
-    def enroll(courses)
-      
+    def enroll(courses, courses_hash)
+
       # Courses is an array.
       if courses.class() == Array
         courses.each { |course|
           @enrolled_courses.push(course)
+          courses_hash[course].enrolled_students.push(self)
           puts "#{@student_id} enrolled in #{course}!"
         }
       
       # Courses is a string.
       elsif courses.class() == String
         @enrolled_courses.push(courses)
-          puts "#{@student_id} enrolled in #{courses}!"
+        courses_hash[course].enrolled_students.push(self)
+        puts "#{@student_id} enrolled in #{courses}!"
       end
 
     end
