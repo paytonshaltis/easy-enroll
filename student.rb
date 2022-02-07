@@ -115,6 +115,7 @@ class Student
 
         # Add reference to the course.
         courses_hash[course].enrolled_students().push(self)
+        puts "#{self.student_id} enrolled in #{course}"
       }
     
     # Courses is a string.
