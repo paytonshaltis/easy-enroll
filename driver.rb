@@ -37,47 +37,88 @@ def main()
     puts "  >> #{course.course_number()}, #{course.enrolled_students().size()} total, #{course.total_min} total min, #{course.total_max} total max, #{course.num_overenrolled_students()} overenrolled, "
   }
 
-  # Need to unenroll students until all students are enrolled in 
-  # exactly how many courses they requested (0, 1, 2).
-  while Student.overenrollments(students) > 0
-  
-    puts "#{Student.overenrollments(students)} overenrollments."
+  # For each course that is over its total max.
+  puts "#{Student.overenrollments(students)} overenrollments."
+  courses.each { |course|
+    if (course.enrolled_students.size() > course.total_max())
 
-    # For each course that is over its total max.
-    courses.each { |course|
-      if course.enrolled_students.size() > course.total_max()
+      # Determine the max number of successful unenrollments allowed.
+      max_unenrollments = course.enrolled_students.size() - course.total_max()
+      puts "#{course.course_number}: #{course.enrolled_students.size()} students is GREATER than #{course.total_max} total max."
+      puts "Unenrolling a max of #{max_unenrollments}..."
 
-        # Determine the max number of successful unenrollments allowed.
-        max_unenrollments = course.enrolled_students.size() - course.total_max()
-        puts "#{course.course_number}: #{course.enrolled_students.size()} students is GREATER than #{course.total_max} total max."
-        puts "Unenrolling a max of #{max_unenrollments}..."
+      # Determine which students will be unenrolled.
+      unenrolling = []
+      course.enrolled_students().each { |student|
+        if student.overenrolled()
+          unenrolling.push(student)
+          max_unenrollments -= 1
+        end
+        if max_unenrollments == 0
+          break
+        end
+      }
 
-        # Determine which students will be unenrolled.
-        unenrolling = []
-        course.enrolled_students().each { |student|
-          if student.overenrolled()
-            puts "#{student.student_id} will be UNENROLLED from #{course.course_number}."
-            unenrolling.push(student)
-            max_unenrollments -= 1
-          end
-          if max_unenrollments == 0
-            break
-          end
-        }
+      # Remove these students now.
+      unenrolling.each { |student|
+        student.unenroll(course.course_number, courses_hash)
+        puts "#{student.student_id} was UNENROLLED from #{course.course_number}."
+      }
+      puts "  >> #{course.course_number()}, #{course.enrolled_students().size()} total, #{course.total_min} total min, #{course.total_max} total max, #{course.num_overenrolled_students()} overenrolled, "
 
-        # Remove these students now.
-        unenrolling.each { |student|
-          student.unenroll(course.course_number, courses_hash)
-          puts "#{student.student_id} was UNENROLLED from #{course.course_number}."
-        }
-        puts "  >> #{course.course_number()}, #{course.enrolled_students().size()} total, #{course.total_min} total min, #{course.total_max} total max, #{course.num_overenrolled_students()} overenrolled, "
+    end
+  }
 
-      end
-    }
 
-    break
+  # For each course that is over its total min.
+  puts "#{Student.overenrollments(students)} overenrollments."
+  courses.each { |course|
+    if (course.enrolled_students.size() > course.total_min())
+    
+      # Determine the max number of successful unenrollments allowed.
+      max_unenrollments = course.enrolled_students.size() - course.total_min()
+      puts "#{course.course_number}: #{course.enrolled_students.size()} students is GREATER than #{course.total_min} total min."
+      puts "Unenrolling a max of #{max_unenrollments}..."
 
-  end
+      # Determine which students will be unenrolled.
+      unenrolling = []
+      course.enrolled_students().each { |student|
+        if student.overenrolled()
+          unenrolling.push(student)
+          max_unenrollments -= 1
+        end
+        if max_unenrollments == 0
+          break
+        end
+      }
+      
+      # Removing these students now.
+      unenrolling.each { |student|
+        student.unenroll(course.course_number, courses_hash)
+        puts "#{student.student_id} was UNENROLLED from #{course.course_number}."
+      }
+      puts "  >> #{course.course_number()}, #{course.enrolled_students().size()} total, #{course.total_min} total min, #{course.total_max} total max, #{course.num_overenrolled_students()} overenrolled, "
+
+
+    end
+  }
+
+  puts "SO FAR:"
+  # Print all of the students in each course.
+  courses.each { |course|
+    puts "  >> #{course.course_number()}, #{course.enrolled_students().size()} total, #{course.total_min} total min, #{course.total_max} total max, #{course.num_overenrolled_students()} overenrolled, "
+  }
+
+  # For each course that is below its total min.
+  puts "#{Student.overenrollments(students)} overenrollments."
+  courses.each { |course|
+    
+  }
+
+  # Print each student's enrollments
+  students.each { |student|
+    puts "Priority: #{student.priority}, Overenrolled: #{student.overenrolled}, Enrolled: #{student.enrolled_courses}, #{student.student_id}, #{student.student_year}, #{student.courses_taken}, #{student.semesters_left}, #{student.num_requests}, #{student.prefs}"
+  }
 
 # Need to unenroll students until total overenrollments is 0.
 # while Student.overenrollments() > 0
