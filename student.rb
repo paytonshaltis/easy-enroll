@@ -160,8 +160,9 @@ class Student
     # Add the reason for not getting into the class.
     @reasons.push(reason)
 
-    # Remove the class from the student's enrollments.
-    puts "#{@student_id} was dropped from #{@enrolled_courses.delete(course)}"
+    # Remove the course and student from one another.
+    @enrolled_courses.delete(course)
+    courses_hash[course].enrolled_students().delete(self)
 
   end
 
@@ -192,7 +193,7 @@ class Student
       reason_string = "N/A"
     end
 
-    # Print the CSV-formatted Student string.
+    # REturn the CSV-formatted Student string.
     "#{@student_id},\"#{enrolled_string}\",\"#{reason_string}\""
   end
 
