@@ -215,12 +215,15 @@ def main()
   single_enrolled = []
   not_enrolled = []
   
-  # Traverse through each course over its total max
+  # Traverse through each course, remove students from those that are over
+  # their max or below their mins.
   courses.each { |course|
     
     # Just here for context; can remove eventually.
     if  course.enrolled_students.size() > course.total_max()
       puts "#{course.course_number} has #{course.enrolled_students.size()} students, but a max of #{course.total_max()}. Need to kick some..."
+    elsif course.enrolled_students.size() < course.total_min()
+      puts "THIS SHOULD NEVER BE REACHED; SECTION COUNTS DECREASED IN UNENROLLMENT!!"
     end
 
     while course.enrolled_students.size() > course.total_max()
@@ -243,8 +246,6 @@ def main()
 
     end
   }
-
-  # Need to drop kids from sections below their total mins.
 
   # Print the list of unenrolled students and kicked students with a single course.
   puts "UNENROLLED STUDENTS:"
