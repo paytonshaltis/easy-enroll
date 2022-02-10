@@ -123,7 +123,9 @@ class Student
       @enrolled_courses.push(courses)
 
       # Add reference to the course.
-      courses_hash[course].enrolled_students().push(self)
+      courses_hash[courses].enrolled_students().push(self)
+      puts "#{self.student_id} enrolled in #{courses}"
+
     end
 
   end
