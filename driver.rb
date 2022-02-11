@@ -3,6 +3,7 @@ require "./student"
 require "./course"
 
 def main()
+  
   courses = []
   courses_hash = {}
   students = []
@@ -10,7 +11,7 @@ def main()
 
   # Read in the course info from constraints.csv
   header_read = false
-  CSV.foreach("./input-files/course_constraints.csv") { |row|
+  CSV.foreach("./input-files/constraints.csv") { |row|
     
     # Should ignore the header row from CSV files.
     if not header_read
@@ -29,7 +30,7 @@ def main()
 
   # Read in the preferences from prefs.csv
   header_read = false
-  CSV.foreach("./input-files/student_prefs.csv") { |row|
+  CSV.foreach("./input-files/prefs.csv") { |row|
     
     # Should ignore the header row from CSV files.
     if not header_read
@@ -404,8 +405,45 @@ def main()
 
 # Write to the output files.
 
+puts "=================================================="
+puts "Let's find the lowest student with 2 enrollments in 325:"
 
+courses_hash["CSC 325"].enrolled_students.each { |student|
+  puts "Priority: #{student.priority}, Overenrolled: #{student.overenrolled}, Enrolled: #{student.enrolled_courses}, #{student.student_id}, #{student.student_year}, #{student.courses_taken}, #{student.semesters_left}, #{student.num_requests}, #{student.prefs}"
+}
 
+puts "#{lowest_priority_student("CSC 325", courses_hash, 1).student_id()}"
+
+end
+
+# Returns a reference to the student in course_name with the lowest
+# priority who is enrolled in num_enrolled courses.
+def lowest_priority_student(course_name, courses_hash, num_enrolled)
+
+  # Retrieve the reference to the course.
+  course_ref = courses_hash[course_name]
+
+  # Need to keep track of the lowest priority student.
+  lowest_student = nil
+
+  # Find the correct student from the class.
+  course_ref.enrolled_students.each { |student|
+    
+    # If lowest_student is nil, track the first student.
+    if (not lowest_student) && (student.enrolled_courses.size() == num_enrolled)
+      lowest_student = student
+
+    puts "#{not lowest_student}"
+
+    # Compare priorities and course enrollments.
+    elsif (lowest_student) && (student.priority() < lowest_student.priority()) && student.enrolled_courses().size() == num_enrolled
+      lowest_student = student
+    end
+
+  }
+
+  # Return the student. This may be nil if none qualify.
+  lowest_student
 
 end
 
