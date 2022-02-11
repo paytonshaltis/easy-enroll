@@ -9,8 +9,16 @@ def main()
   dropped_courses = []
 
   # Read in the course info from constraints.csv
-  CSV.foreach("./input-files/constraints.csv") { |row|
+  header_read = false
+  CSV.foreach("./input-files/course_constraints.csv") { |row|
     
+    # Should ignore the header row from CSV files.
+    if not header_read
+      header_read = true
+      puts "Skipping course header..."
+      next
+    end
+
     # Add the course to the course list.
     addedCourse = Course.new(row)
     courses.push(addedCourse)
@@ -20,8 +28,16 @@ def main()
   }
 
   # Read in the preferences from prefs.csv
-  CSV.foreach("./input-files/prefs.csv") { |row|
+  header_read = false
+  CSV.foreach("./input-files/student_prefs.csv") { |row|
     
+    # Should ignore the header row from CSV files.
+    if not header_read
+      header_read = true
+      puts "Skipping student header..."
+      next
+    end
+
     # Create the Student object.
     addedStudent = Student.new(row)
 
@@ -354,6 +370,11 @@ def main()
   }
   puts prefs_hash
 
+  # Need to try enrolling the not enrolled students.
+  
+
+  # Need to try enrolling the single enrolled students.
+
   # Print the list of unenrolled students and kicked students with a single course.
   puts "UNENROLLED STUDENTS:"
   not_enrolled.each { |student|
@@ -380,8 +401,6 @@ def main()
   courses.each { |course|
     puts "#{course.course_number}: #{course.init_num_sections - course.curr_num_sections}"
   }
-
-# Deal with students removed from classes AFTER unenrollment
 
 # Write to the output files.
 
