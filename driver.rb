@@ -560,6 +560,100 @@ def main()
     not_enrolled.delete(student)
   }
 
+  # Finally, we must consider the students that are only enrolled in a single
+  # course, but would like another. This should be done by comparing the
+  # priorities of all students in their preferences to see if any can drop
+  # one of their courses to make room for the higher-priority student. Note that
+  # only students enrolled in 2 courses will be compared, so by this point, NO 
+  # more students will become unenrolled.
+
+  # Prove that no students become unenrolled after this process.
+  count = 0
+  students.each { |student|
+
+    # Only count students that are not enrolled in any course, as long
+    # as they have requested a course
+    if student.enrolled_courses.size() == 0 && student.num_requests > 0
+      count += 1
+    end
+  }
+  puts "Total unenrolled students: #{count}"
+
+  # Consider all of the students who are single enrolled
+  puts "SINGLE ENROLLED --> 2X ENROLLED"
+  remove_from_single_enrolled = []
+  single_enrolled.each { |student|
+    
+    puts " >> Priority: #{student.priority}, Overenrolled: #{student.overenrolled}, Enrolled: #{student.enrolled_courses}, #{student.student_id}, #{student.student_year}, #{student.courses_taken}, #{student.semesters_left}, #{student.num_requests}, #{student.prefs}"
+    student.prefs.each { |pref|
+      puts "#{pref}"
+    }
+
+    # Mark the lowest priority student enrolled in 2 courses.
+    marked_student = nil
+    marked_course = nil
+
+    # Look through all of the student's preferences.
+    student.prefs.each { |pref|
+
+      # Get the lowest priority student in this preference if the student is not
+      # already enrolled in this course.
+      if not student.enrolled_courses.include?(pref)
+        lowest_student = lowest_priority_student(pref, courses_hash, 2)
+      end  
+      
+        # See if the lowest student found is lower priority than 
+        # the currently marked student.
+        if lowest_student && ((not marked_student) || lowest_student.priority() < marked_student.priority())
+          marked_student = lowest_student
+          marked_course = pref
+        end
+
+    }
+
+    # Here, we must consider student priority. Since the marked student will
+    # lose a class, we need to make sure that they really have a lower 
+    # priority than the student being swapped in.
+    if marked_student && (student.priority() > marked_student.priority())
+      puts " ### FOUND STUDENTS TO SWAP: "
+      puts " >> Priority: #{student.priority}, Overenrolled: #{student.overenrolled}, Enrolled: #{student.enrolled_courses}, #{student.student_id}, #{student.student_year}, #{student.courses_taken}, #{student.semesters_left}, #{student.num_requests}, #{student.prefs}"
+      puts " >> Priority: #{marked_student.priority}, Overenrolled: #{marked_student.overenrolled}, Enrolled: #{marked_student.enrolled_courses}, #{marked_student.student_id}, #{marked_student.student_year}, #{marked_student.courses_taken}, #{marked_student.semesters_left}, #{marked_student.num_requests}, #{marked_student.prefs}"
+      puts " >> #{marked_course}"
+      puts " ###"
+
+      # Drop the student from this course, adding them to the appropriate array.
+      marked_student.drop(marked_course, "Removed from #{marked_course} due to higher priority student wanting 2 courses.", courses_hash)
+      single_enrolled.push(marked_student)
+
+      # Enroll the current student in this course, marking them for 
+      # removal from the not enrolled array.
+      student.enroll(marked_course, courses_hash)
+      remove_from_single_enrolled.push(student)
+
+    else
+      puts "This student could not be swapped into any ADDITIONAL courses."
+      remove_from_single_enrolled.push(student)
+    end
+  }
+
+  # Removed each of the students who were either swapped into an additional
+  # course, or could not be added to 2 courses.
+  remove_from_single_enrolled.each { |student|
+    single_enrolled.delete(student)
+  }
+
+  # Prove that no students become unenrolled after this process.
+  count = 0
+  students.each { |student|
+
+    # Only count students that are not enrolled in any course, as long
+    # as they have requested a course
+    if student.enrolled_courses.size() == 0 && student.num_requests > 0
+      count += 1
+    end
+  }
+  puts "Total unenrolled students: #{count}"
+
   # Print the list of unenrolled students and kicked students with a single course.
   puts "UNENROLLED STUDENTS:"
   not_enrolled.each { |student|
