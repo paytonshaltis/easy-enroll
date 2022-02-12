@@ -11,7 +11,7 @@ def main()
 
   # Read in the course info from constraints.csv
   header_read = false
-  CSV.foreach("./input-files/constraints.csv") { |row|
+  CSV.foreach("./input-files/course_constraints.csv") { |row|
     
     # Should ignore the header row from CSV files.
     if not header_read
@@ -30,7 +30,7 @@ def main()
 
   # Read in the preferences from prefs.csv
   header_read = false
-  CSV.foreach("./input-files/prefs.csv") { |row|
+  CSV.foreach("./input-files/student_prefs.csv") { |row|
     
     # Should ignore the header row from CSV files.
     if not header_read
@@ -371,10 +371,79 @@ def main()
   }
   puts prefs_hash
 
-  # Need to try enrolling the not enrolled students.
-  
+  # Print the list of unenrolled students and kicked students with a single course.
+  puts "UNENROLLED STUDENTS:"
+  not_enrolled.each { |student|
+    puts "Priority: #{student.priority}, Overenrolled: #{student.overenrolled}, Enrolled: #{student.enrolled_courses}, #{student.student_id}, #{student.student_year}, #{student.courses_taken}, #{student.semesters_left}, #{student.num_requests}, #{student.prefs}"
+  }
+  puts "ONLY 1 COURSE / KICKED:"
+  single_enrolled.each { |student|
+    puts "Priority: #{student.priority}, Overenrolled: #{student.overenrolled}, Enrolled: #{student.enrolled_courses}, #{student.student_id}, #{student.student_year}, #{student.courses_taken}, #{student.semesters_left}, #{student.num_requests}, #{student.prefs}"
+  }
 
-  # Need to try enrolling the single enrolled students.
+  # For the kicked students remaining, try just adding them into
+  # courses that may still have room in them.
+  remove_from_not_enrolled = []
+  remove_from_single_enrolled = []
+
+  puts "========================================================================================================================"
+
+  not_enrolled.each { |student|
+    student.prefs.each { |course|
+      
+      # If a course has a spot open, enroll the student.
+      if courses_hash[course].enrolled_students.size() < courses_hash[course].total_max()
+        
+        puts "#{courses_hash[course].course_number} has room for student #{student.student_id}!"
+        
+        # Mark the student to be removed from their array.
+        remove_from_not_enrolled.push(student)
+
+        # Enroll the student.
+        student.enroll(course, courses_hash)
+
+        # We are done with this student now.
+        break
+
+      end
+    }
+  }
+
+  # Delete the students that were enrolled successfully.
+  remove_from_not_enrolled.each { |student|
+    not_enrolled.delete(student)
+  }
+
+  single_enrolled.each { |student|
+    student.prefs.each { |course|
+      
+      # If a course has a spot open, and the student is not
+      # already enrolled in this course, enroll the student.
+      if (courses_hash[course].enrolled_students.size() < courses_hash[course].total_max()) && (not student.enrolled_courses.include?(course))
+        
+        puts "#{courses_hash[course].course_number} has room for student #{student.student_id}!"
+        
+        # Mark the student to be removed from their array.
+        remove_from_single_enrolled.push(student)
+
+        # Enroll the student.
+        student.enroll(course, courses_hash)
+
+        # We are done with this student now.
+        break
+
+      end
+    }
+  }
+
+  # Delete the students that were enrolled successfully.
+  remove_from_single_enrolled.each { |student|
+    not_enrolled.delete(student)
+  }
+
+  # For the kicked students remaining, begin adding them into 
+  # courses by swapping out lower-priority students.
+
 
   # Print the list of unenrolled students and kicked students with a single course.
   puts "UNENROLLED STUDENTS:"
@@ -405,15 +474,6 @@ def main()
 
 # Write to the output files.
 
-puts "=================================================="
-puts "Let's find the lowest student with 2 enrollments in 325:"
-
-courses_hash["CSC 325"].enrolled_students.each { |student|
-  puts "Priority: #{student.priority}, Overenrolled: #{student.overenrolled}, Enrolled: #{student.enrolled_courses}, #{student.student_id}, #{student.student_year}, #{student.courses_taken}, #{student.semesters_left}, #{student.num_requests}, #{student.prefs}"
-}
-
-puts "#{lowest_priority_student("CSC 325", courses_hash, 1).student_id()}"
-
 end
 
 # Returns a reference to the student in course_name with the lowest
@@ -435,7 +495,7 @@ def lowest_priority_student(course_name, courses_hash, num_enrolled)
 
     puts "#{not lowest_student}"
 
-    # Compare priorities and course enrollments.
+    # Compare priorities and course enrollments to update the tracked student.
     elsif (lowest_student) && (student.priority() < lowest_student.priority()) && student.enrolled_courses().size() == num_enrolled
       lowest_student = student
     end
