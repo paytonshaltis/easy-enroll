@@ -438,7 +438,7 @@ def main()
 
   # Delete the students that were enrolled successfully.
   remove_from_single_enrolled.each { |student|
-    not_enrolled.delete(student)
+    single_enrolled.delete(student)
   }
 
   # For the kicked students remaining, begin adding them into 
