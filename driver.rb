@@ -441,8 +441,9 @@ def main()
     single_enrolled.delete(student)
   }
 
-  # For the kicked students remaining, begin adding them into 
-  # courses by swapping out lower-priority students.
+  # Next, try swapping the lowest priority student from a 
+  # course who is enrolled in two courses with a student that
+  # is not enrolled in any.
   remove_from_not_enrolled = []
   not_enrolled.each { |student|
     
@@ -470,9 +471,10 @@ def main()
 
     }
 
-    # If the marked student's priority is lower than the current
-    # student, swap the two.
-    if marked_student && (student.priority() > marked_student.priority())
+    # We don't care about the unenrolled student's priority; no
+    # student should be enrolled in two courses while there are
+    # still students unenrolled.
+    if marked_student
       puts " ### FOUND STUDENTS TO SWAP: "
       puts " >> Priority: #{student.priority}, Overenrolled: #{student.overenrolled}, Enrolled: #{student.enrolled_courses}, #{student.student_id}, #{student.student_year}, #{student.courses_taken}, #{student.semesters_left}, #{student.num_requests}, #{student.prefs}"
       puts " >> Priority: #{marked_student.priority}, Overenrolled: #{marked_student.overenrolled}, Enrolled: #{marked_student.enrolled_courses}, #{marked_student.student_id}, #{marked_student.student_year}, #{marked_student.courses_taken}, #{marked_student.semesters_left}, #{marked_student.num_requests}, #{marked_student.prefs}"
