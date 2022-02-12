@@ -739,6 +739,127 @@ def main()
   }
   puts "Total unenrolled students: #{count}"
 
+  # The final thing to do is try reviving a course with students who are unenrolled
+  # and single enrolled.
+  single_enrolled = []
+  not_enrolled = []
+  prefs_hash = Hash.new(0)
+  students.each { |student|
+    if student.enrolled_courses.size() == 0 && (student.num_requests >= 1 && student.prefs.size() >= 1)
+      not_enrolled.push(student)
+    elsif student.enrolled_courses.size() == 1 && (student.num_requests == 2 && student.prefs.size() >= 2)
+      single_enrolled.push(student)
+    end
+  }
+
+  puts "Single enrolled: #{single_enrolled.size()}"
+  puts "Not enrolled: #{not_enrolled.size()}"
+
+  # Tally up all of the unenrolled preferences.
+  not_enrolled.each { |student|
+    student.prefs.each { |course|
+        prefs_hash[course] += 1
+    }
+  }
+
+  # Tally up the single enrolled non-duplicate preferences.
+  single_enrolled.each { |student|
+    student.prefs.each { |course|
+
+      # Only consider students with a single enrollment; others are dupes.
+      if student.enrolled_courses.size() == 1
+        
+        # If the student has a preference that they aren't enrolled in.
+        if not student.enrolled_courses().include?(course)
+          prefs_hash[course] += 1
+        end
+      
+      end
+    }
+  }
+  puts prefs_hash
+
+  # Revive any classes that are capable of it.
+  courses.each { |course|
+  
+    # Determine if it can be revived
+    while course.init_num_sections() > course.curr_num_sections() && prefs_hash[course.course_number] > course.min()
+      puts "#{course.course_number} can revive a section!"
+      
+      # Increase the course's section count.
+      course.curr_num_sections += 1
+
+      # Enroll up to course.max() students into the course
+      total_added = 0
+      remove_from_not_enrolled = []
+      remove_from_single_enrolled = []
+        
+      # Start with the unenrolled students.
+      not_enrolled.each { |student|
+        if student.prefs.include?(course.course_number)
+          
+          # Enroll this student in the course.
+          student.enroll(course.course_number, courses_hash)
+
+          # Subtract one from all of their prefs in the hash.
+          student.prefs.each { |pref|
+            prefs_hash[pref] -= 1
+          }
+
+          # Mark the student to be removed from this array.
+          remove_from_not_enrolled.push(student)
+          total_added += 1
+        end
+        if total_added == course.max()
+          break
+        end
+      }
+
+      # Remove each of the marked students from the not_enrolled array.
+      remove_from_not_enrolled.each { |student|
+        puts "Priority: #{student.priority}, Overenrolled: #{student.overenrolled}, Enrolled: #{student.enrolled_courses}, #{student.student_id}, #{student.student_year}, #{student.courses_taken}, #{student.semesters_left}, #{student.num_requests}, #{student.prefs}"
+        not_enrolled.delete(student)
+      }
+
+      puts prefs_hash
+
+      # See if we shold continue adding students.
+      if total_added == course.max()
+        break
+      end
+
+      # Continue with the single enrolled students.
+      single_enrolled.each { |student|
+
+        # Make sure that they aren't already enrolled in this course.
+        if student.prefs.include?(course.course_number) && (not student.enrolled_courses.include?(course.course_number))
+          
+          # Enroll this student in the course.
+          student.enroll(course.course_number, courses_hash)
+
+          # Subtract one from all of their prefs.
+          student.prefs.each { |pref|
+            prefs_hash[pref] -= 1
+          }
+
+          # Mark the student to be removed from this array.
+          remove_from_single_enrolled.push(student)
+          total_added += 1
+        end
+        if total_added == course.max()
+          break
+        end
+      }
+
+      # Remove these students from the single enrolled array.
+      remove_from_single_enrolled.each { |student|
+        puts "Priority: #{student.priority}, Overenrolled: #{student.overenrolled}, Enrolled: #{student.enrolled_courses}, #{student.student_id}, #{student.student_year}, #{student.courses_taken}, #{student.semesters_left}, #{student.num_requests}, #{student.prefs}"
+        single_enrolled.delete(student)
+      }
+
+    end
+  }
+
   # Write to the output files.
 
   # Print the list of unenrolled students and kicked students with a single course.
@@ -786,6 +907,40 @@ def main()
     end
   }
 
+  puts "ENROLLMENT STATS:"
+  filled_2 = 0
+  filled_1 = 0
+  empty_2 = 0
+  empty_1 = 0
+  total_empty_2 = 0
+  requested_0 = 0
+  students.each { |student|
+    if student.enrolled_courses().size() == 3
+      puts "****************************MAJOR ERROR! STUDENT ENROLLED IN 3 COURSES!!"
+    elsif student.enrolled_courses().size() == 2
+      filled_2 += 1
+    elsif student.enrolled_courses().size() == 1 && student.num_requests == 2 && student.prefs.size() >= 2
+      empty_2 += 1
+    elsif student.enrolled_courses().size() == 1 && student.num_requests == 1
+      filled_1 += 1
+    elsif student.enrolled_courses().size() == 0 && student.num_requests == 1 && student.prefs.size() >= 1
+      empty_1 += 1
+    elsif student.enrolled_courses().size() == 0 && student.num_requests == 2 && student.prefs.size() >= 2
+      total_empty_2 += 1
+    elsif student.num_requests == 0
+      requested_0 += 1
+    end
+
+  }
+  puts "Legitimate students who requested courses correctly (num requests >= prefs)"
+  puts "Students enrolled in 2/2 courses: #{filled_2}"
+  puts "Students enrolled in 1/2 courses: #{empty_2}"
+  puts "Students enrolled in 0/2 courses: #{total_empty_2}"
+  puts "Students enrolled in 1/1 courses: #{filled_1}"
+  puts "Students enrolled in 0/1 courses: #{empty_1}"
+  puts "Students who requested 0 courses: #{requested_0}"
+  
+  puts "TOTAL: #{filled_1 + filled_2 + empty_1 + empty_2 + total_empty_2 + requested_0}"
 
 end
 
