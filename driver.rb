@@ -387,58 +387,58 @@ def main()
 
   puts "========================================================================================================================"
 
-  not_enrolled.each { |student|
-    student.prefs.each { |course|
+  # not_enrolled.each { |student|
+  #   student.prefs.each { |course|
       
-      # If a course has a spot open, enroll the student.
-      if courses_hash[course].enrolled_students.size() < courses_hash[course].total_max()
+  #     # If a course has a spot open, enroll the student.
+  #     if courses_hash[course].enrolled_students.size() < courses_hash[course].total_max()
         
-        puts "#{courses_hash[course].course_number} has room for student #{student.student_id}!"
+  #       puts "#{courses_hash[course].course_number} has room for student #{student.student_id}!"
         
-        # Mark the student to be removed from their array.
-        remove_from_not_enrolled.push(student)
+  #       # Mark the student to be removed from their array.
+  #       remove_from_not_enrolled.push(student)
 
-        # Enroll the student.
-        student.enroll(course, courses_hash)
+  #       # Enroll the student.
+  #       student.enroll(course, courses_hash)
 
-        # We are done with this student now.
-        break
+  #       # We are done with this student now.
+  #       break
 
-      end
-    }
-  }
+  #     end
+  #   }
+  # }
 
-  # Delete the students that were enrolled successfully.
-  remove_from_not_enrolled.each { |student|
-    not_enrolled.delete(student)
-  }
+  # # Delete the students that were enrolled successfully.
+  # remove_from_not_enrolled.each { |student|
+  #   not_enrolled.delete(student)
+  # }
 
-  single_enrolled.each { |student|
-    student.prefs.each { |course|
+  # single_enrolled.each { |student|
+  #   student.prefs.each { |course|
       
-      # If a course has a spot open, and the student is not
-      # already enrolled in this course, enroll the student.
-      if (courses_hash[course].enrolled_students.size() < courses_hash[course].total_max()) && (not student.enrolled_courses.include?(course))
+  #     # If a course has a spot open, and the student is not
+  #     # already enrolled in this course, enroll the student.
+  #     if (courses_hash[course].enrolled_students.size() < courses_hash[course].total_max()) && (not student.enrolled_courses.include?(course))
         
-        puts "#{courses_hash[course].course_number} has room for student #{student.student_id}!"
+  #       puts "#{courses_hash[course].course_number} has room for student #{student.student_id}!"
         
-        # Mark the student to be removed from their array.
-        remove_from_single_enrolled.push(student)
+  #       # Mark the student to be removed from their array.
+  #       remove_from_single_enrolled.push(student)
 
-        # Enroll the student.
-        student.enroll(course, courses_hash)
+  #       # Enroll the student.
+  #       student.enroll(course, courses_hash)
 
-        # We are done with this student now.
-        break
+  #       # We are done with this student now.
+  #       break
 
-      end
-    }
-  }
+  #     end
+  #   }
+  # }
 
-  # Delete the students that were enrolled successfully.
-  remove_from_single_enrolled.each { |student|
-    single_enrolled.delete(student)
-  }
+  # # Delete the students that were enrolled successfully.
+  # remove_from_single_enrolled.each { |student|
+  #   single_enrolled.delete(student)
+  # }
 
   # Next, try swapping the lowest priority student from a 
   # course who is enrolled in two courses with a student that
@@ -453,8 +453,36 @@ def main()
     }
 
     # Mark the lowest priority student enrolled in 2 courses.
+    done_checking = false
     marked_student = nil
     marked_course = nil
+
+    # Look through all of the student's preferences.
+    student.prefs.each { |pref|
+    
+      # If a course has a spot open, enroll the student.
+      if courses_hash[pref].enrolled_students.size() < courses_hash[pref].total_max()
+        
+        puts "#{courses_hash[pref].course_number} has room for student #{student.student_id}!"
+        
+        # Mark the student to be removed from their array.
+        remove_from_not_enrolled.push(student)
+
+        # Enroll the student.
+        student.enroll(pref, courses_hash)
+
+        # We are done with this student now.
+        done_checking = true
+        break
+
+      end
+
+    }
+
+    # See if we were able to just add the student.
+    if done_checking
+      next
+    end
 
     # Look through all of the student's preferences.
     student.prefs.each { |pref|
@@ -511,8 +539,36 @@ def main()
     }
 
     # Mark the lowest priority student enrolled in 1 course.
+    done_checking = false
     marked_student = nil
     marked_course = nil
+
+    # Look through all of the student's preferences.
+    student.prefs.each { |pref|
+    
+      # If a course has a spot open, enroll the student.
+      if courses_hash[pref].enrolled_students.size() < courses_hash[pref].total_max()
+        
+        puts "#{courses_hash[pref].course_number} has room for student #{student.student_id}!"
+        
+        # Mark the student to be removed from their array.
+        remove_from_not_enrolled.push(student)
+
+        # Enroll the student.
+        student.enroll(pref, courses_hash)
+
+        # We are done with this student now.
+        done_checking = true
+        break
+
+      end
+
+    }
+
+    # See if we were able to just add the student.
+    if done_checking
+      next
+    end
 
     # Look through all of the student's preferences.
     student.prefs.each { |pref|
@@ -590,8 +646,37 @@ def main()
     }
 
     # Mark the lowest priority student enrolled in 2 courses.
+    done_checking = false
     marked_student = nil
     marked_course = nil
+
+    # Look through all of the student's preferences.
+    student.prefs.each { |pref|    
+
+      # If a course has a spot open, and the student is not
+      # already enrolled in this course, enroll the student.
+      if (courses_hash[pref].enrolled_students.size() < courses_hash[pref].total_max()) && (not student.enrolled_courses.include?(pref))
+        
+        puts "#{courses_hash[pref].course_number} has room for student #{student.student_id}!"
+        
+        # Mark the student to be removed from their array.
+        remove_from_single_enrolled.push(student)
+
+        # Enroll the student.
+        student.enroll(pref, courses_hash)
+
+        # We are done with this student now.
+        done_checking = true
+        break
+
+      end
+
+    }
+
+    # See if we were able to just add the student.
+    if done_checking
+      next
+    end
 
     # Look through all of the student's preferences.
     student.prefs.each { |pref|
@@ -654,6 +739,8 @@ def main()
   }
   puts "Total unenrolled students: #{count}"
 
+  # Write to the output files.
+
   # Print the list of unenrolled students and kicked students with a single course.
   puts "UNENROLLED STUDENTS:"
   not_enrolled.each { |student|
@@ -681,7 +768,24 @@ def main()
     puts "#{course.course_number}: #{course.init_num_sections - course.curr_num_sections}"
   }
 
-# Write to the output files.
+  # Print out some final results.
+  puts "============================================================================="
+  puts "FINAL RESULTS:"
+  puts "COURSES:"
+  courses.each { |course|
+    puts "  >> #{course.course_number()}, #{course.enrolled_students().size()} total, #{course.total_min} total min, #{course.total_max} total max, #{course.num_overenrolled_students()} overenrolled, "
+    course.enrolled_students.each { |student|
+      puts "Priority: #{student.priority}, Overenrolled: #{student.overenrolled}, Enrolled: #{student.enrolled_courses}, #{student.student_id}, #{student.student_year}, #{student.courses_taken}, #{student.semesters_left}, #{student.num_requests}, #{student.prefs}"
+    }
+  }
+
+  puts "BAD STUDENTS:"
+  students.each { |student|
+    if (student.prefs.include?("CSC 471")) && (not student.enrolled_courses.include?("CSC 471")) && (student.enrolled_courses.size() < 2) && student.num_requests() == 2
+      puts "Priority: #{student.priority}, Overenrolled: #{student.overenrolled}, Enrolled: #{student.enrolled_courses}, #{student.student_id}, #{student.student_year}, #{student.courses_taken}, #{student.semesters_left}, #{student.num_requests}, #{student.prefs}"
+    end
+  }
+
 
 end
 
