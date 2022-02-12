@@ -66,7 +66,7 @@ class Student
       @priority += 30000
     when "Sophomore"
       @priority += 20000
-    when "First Year"
+    when "First year student"
       @priority += 10000
     end
 

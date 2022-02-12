@@ -443,7 +443,57 @@ def main()
 
   # For the kicked students remaining, begin adding them into 
   # courses by swapping out lower-priority students.
+  remove_from_not_enrolled = []
+  not_enrolled.each { |student|
+    
+    puts " >> Priority: #{student.priority}, Overenrolled: #{student.overenrolled}, Enrolled: #{student.enrolled_courses}, #{student.student_id}, #{student.student_year}, #{student.courses_taken}, #{student.semesters_left}, #{student.num_requests}, #{student.prefs}"
+    student.prefs.each { |pref|
+      puts "#{pref}"
+    }
 
+    # Mark the lowest priority student enrolled in 2 courses.
+    marked_student = nil
+    marked_course = nil
+
+    # Look through all of the student's preferences.
+    student.prefs.each { |pref|
+
+      # Get the lowest priority student in this preference.
+      lowest_student = lowest_priority_student(pref, courses_hash, 2)
+      
+      # See if the lowest student found is lower priority than 
+      # the currently marked student.
+      if lowest_student && ((not marked_student) || lowest_student.priority() < marked_student.priority())
+        marked_student = lowest_student
+        marked_course = pref
+      end
+
+    }
+
+    # If the marked student's priority is lower than the current
+    # student, swap the two.
+    if marked_student && (student.priority() > marked_student.priority())
+      puts " ### FOUND STUDENTS TO SWAP: "
+      puts " >> Priority: #{student.priority}, Overenrolled: #{student.overenrolled}, Enrolled: #{student.enrolled_courses}, #{student.student_id}, #{student.student_year}, #{student.courses_taken}, #{student.semesters_left}, #{student.num_requests}, #{student.prefs}"
+      puts " >> Priority: #{marked_student.priority}, Overenrolled: #{marked_student.overenrolled}, Enrolled: #{marked_student.enrolled_courses}, #{marked_student.student_id}, #{marked_student.student_year}, #{marked_student.courses_taken}, #{marked_student.semesters_left}, #{marked_student.num_requests}, #{marked_student.prefs}"
+      puts " >> #{marked_course}"
+      puts " ###"
+
+      # Drop the student from this course, adding them to the appropriate array.
+      marked_student.drop(marked_course, "Removed from #{marked_course} due to higher priority student needing enrollment.", courses_hash)
+      single_enrolled.push(marked_student)
+
+      # Enroll the current student in this course, marking them for 
+      # removal from the not enrolled array.
+      student.enroll(marked_course, courses_hash)
+      remove_from_not_enrolled.push(student)
+
+    end
+  }
+
+  remove_from_not_enrolled.each { |student|
+    not_enrolled.delete(student)
+  }
 
   # Print the list of unenrolled students and kicked students with a single course.
   puts "UNENROLLED STUDENTS:"
@@ -492,8 +542,6 @@ def lowest_priority_student(course_name, courses_hash, num_enrolled)
     # If lowest_student is nil, track the first student.
     if (not lowest_student) && (student.enrolled_courses.size() == num_enrolled)
       lowest_student = student
-
-    puts "#{not lowest_student}"
 
     # Compare priorities and course enrollments to update the tracked student.
     elsif (lowest_student) && (student.priority() < lowest_student.priority()) && student.enrolled_courses().size() == num_enrolled
