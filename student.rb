@@ -122,7 +122,6 @@ class Student
 
         # Add reference to the course.
         courses_hash[course].enrolled_students().push(self)
-        puts "#{self.student_id} enrolled in #{course}"
       }
     
     # Courses is a string.
@@ -131,8 +130,6 @@ class Student
 
       # Add reference to the course.
       courses_hash[courses].enrolled_students().push(self)
-      puts "#{self.student_id} enrolled in #{courses}"
-
     end
 
   end
@@ -189,7 +186,6 @@ class Student
 
     # Generate the string of reasons or "N/A".
     @reasons.each { |reason|
-      puts reason
       reason_string += "#{reason} "
     }
     if not reason_string == ""
