@@ -11,13 +11,27 @@ require "./course"
 
 def main()
   
+  pref_file_name = ""
+  constraint_file_name = ""
+  student_output_file_name = ""
+  course_output_file_name = ""
   courses = []
   students = []
   courses_hash = {}
 
+  # Get the names of the input and output files from the user.
+  puts "Enter student preference input file name:"
+  pref_file_name = gets().chomp()
+  puts "Enter course constraints input file name:"
+  constraint_file_name = gets().chomp()
+  puts "Enter student output file name:"
+  student_output_file_name = gets().chomp()
+  puts "Enter course output file name:"
+  course_output_file_name = gets().chomp()
+
   # Enroll all students into all of their preferences.
-  process_courses("course_constraints.csv", courses, courses_hash)
-  process_students("student_prefs.csv", students, courses_hash)
+  process_courses(constraint_file_name, courses, courses_hash)
+  process_students(pref_file_name, students, courses_hash)
 
   # Unenroll from courses until there are no overenrolled students remaining.
   unenroll_above_max(courses, students, courses_hash)
@@ -52,13 +66,13 @@ def main()
 
   # Add resons to each student who is not enrolled in their max courses.
   create_reasons(courses_hash, students)
-  CSV.open("./output.csv", "w") { |csv|
+
+  # Write the students to the desired output file.
+  CSV.open(student_output_file_name, "w") { |csv|
     students.each { |student|
       csv.puts(student.to_csv())
     }
   }
-
-  # Write to the output files.
 
   # Print out some final results.
   puts "============================================================================="
@@ -829,15 +843,23 @@ def create_reasons(courses_hash, students)
 
   # Add reasons to the unenrolled students.
   students.each { |student|
+
+    # First, if the student requested more courses than were
+    # listed in their preferences, add this as a reason.
+    if student.num_requests() > student.prefs().size()
+      student.reasons().push("Requested more courses than preferences.")
+    end
+
     student.prefs().each { |pref|
       
       # Only consider students who are enrolled in less courses than
       # the number that they requested.
-      if (student.enrolled_courses().size() < student.num_requests())
+      if student.enrolled_courses().size() < student.num_requests()
         
         # Add a reason if the student is not enrolled in this course.
-        if (not student.enrolled_courses().include?(pref))
+        if not student.enrolled_courses().include?(pref)
           student.reasons().push(courses_hash[pref].get_reason())
+
         end
 
       end
