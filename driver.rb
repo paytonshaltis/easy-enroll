@@ -277,65 +277,7 @@ def main()
     puts "Priority: #{student.priority}, Overenrolled: #{student.overenrolled}, Enrolled: #{student.enrolled_courses}, #{student.student_id}, #{student.student_year}, #{student.courses_taken}, #{student.semesters_left}, #{student.num_requests}, #{student.prefs}"
   }
 
-  # # For the kicked students remaining, try just adding them into
-  # # courses that may still have room in them.
-  # remove_from_not_enrolled = []
-  # remove_from_single_enrolled = []
-
   puts "========================================================================================================================"
-
-  # not_enrolled.each { |student|
-  #   student.prefs.each { |course|
-      
-  #     # If a course has a spot open, enroll the student.
-  #     if courses_hash[course].enrolled_students.size() < courses_hash[course].total_max()
-        
-  #       puts "#{courses_hash[course].course_number} has room for student #{student.student_id}!"
-        
-  #       # Mark the student to be removed from their array.
-  #       remove_from_not_enrolled.push(student)
-
-  #       # Enroll the student.
-  #       student.enroll(course, courses_hash)
-
-  #       # We are done with this student now.
-  #       break
-
-  #     end
-  #   }
-  # }
-
-  # # Delete the students that were enrolled successfully.
-  # remove_from_not_enrolled.each { |student|
-  #   not_enrolled.delete(student)
-  # }
-
-  # single_enrolled.each { |student|
-  #   student.prefs.each { |course|
-      
-  #     # If a course has a spot open, and the student is not
-  #     # already enrolled in this course, enroll the student.
-  #     if (courses_hash[course].enrolled_students.size() < courses_hash[course].total_max()) && (not student.enrolled_courses.include?(course))
-        
-  #       puts "#{courses_hash[course].course_number} has room for student #{student.student_id}!"
-        
-  #       # Mark the student to be removed from their array.
-  #       remove_from_single_enrolled.push(student)
-
-  #       # Enroll the student.
-  #       student.enroll(course, courses_hash)
-
-  #       # We are done with this student now.
-  #       break
-
-  #     end
-  #   }
-  # }
-
-  # # Delete the students that were enrolled successfully.
-  # remove_from_single_enrolled.each { |student|
-  #   single_enrolled.delete(student)
-  # }
 
   # Next, try swapping the lowest priority student from a 
   # course who is enrolled in two courses with a student that
