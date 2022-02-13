@@ -3,7 +3,7 @@
 # Description: An algorithm that determines the best college course enrollment strategy according to a set of student preferences and course constraings.
 # Filename: student.rb
 # Description: Contains the class implementation for representing Students.
-# Last modified on: February 12, 2022
+# Last modified on: February 13, 2022
 
 # Student class for representing students.
 class Student
@@ -16,22 +16,24 @@ class Student
   attr_accessor :enrolled_courses, :reasons, :priority
 
   # Initializes the Student using a row from the CSV file.
-  def initialize(student_info)
+  def initialize(student_info, courses, courses_hash)
 
-    # Straight from CSV file.
+    # Variables straight from CSV file.
     @student_id = student_info[0]
     @student_year = student_info[1]
     @semesters_left = student_info[3].to_i()
     @num_requests = student_info[4].to_i()
 
-    # Needs formatting.
+    # Values are formatted first via method calls.
     @courses_taken = split_taken(student_info[2])
     @prefs = merge_prefs(student_info[5], student_info[6], student_info[7])
 
-    # Need to set up some variables NOT from CSV file.
+    # Variables NOT from the CSV file.
     @enrolled_courses = []
     @reasons = []
-    calculate_priority()
+
+    # Calculates the priority of the student.
+    calculate_priority(courses, courses_hash)
 
   end
 
@@ -45,22 +47,26 @@ class Student
     end
   end
 
-  # Returns an array of strings representing courses preferred
-  # by the student, omitting the "N/A"s.
+  # Returns an array of strings representing course preferences
+  # of the student, omitting the "N/A"s.
   def merge_prefs(pref1, pref2, pref3)
     unfiltered = [pref1, pref2, pref3]
+    
+    # Only keeps the non-"N/A" values.
     filtered = []
     unfiltered.each { |pref|
       if (pref) && (not pref == "N/A")
         filtered.push(pref)
       end
     }
-    filtered
+
+    return filtered
+
   end
 
   # Returns the priority level of a student based on the 
   # factors described in the assignment. Returns an integer.
-  def calculate_priority()
+  def calculate_priority(courses, courses_hash)
   
     # A higher result indicates a higher priority for classes.
     @priority = 0
@@ -80,12 +86,12 @@ class Student
     # The second digit represents semesters taken.
     @priority += (8 - @semesters_left) * 1000
 
-    # The third and fourth digits represent classes taken.
-    @priority += @courses_taken.size() * 10
+    # The third and fourth digits represent courses taken.
+    @priority += @courses_taken.uniq().size() * 10
 
-    # The fifth digit represents if the studen selected the
+    # The fifth digit represents if the student selected the
     # maximum number of courses that they could.
-    if (@prefs.size() == 3) || (@prefs.size() + @courses_taken.size() == Course.total_courses())
+    if (@prefs.size() == 3) || (@courses_taken.uniq().size() + @prefs.size() == Course.total_courses())
       @priority += 3
     else
       @priority += (@prefs.size())
@@ -104,7 +110,7 @@ class Student
   end
 
   # Returns true if the student is still enrolled in more classes
-  # than they initially requested.
+  # than they initially requested (they are considered overenrolled).
   def overenrolled()
     @enrolled_courses.size() > @num_requests
   end
@@ -160,7 +166,8 @@ class Student
   end
 
   # 'Kicks' a student from a course. This action is performed
-  # when a course is above its total maximum number of students.
+  # when a course is above its total maximum number of students,
+  # or the student is being swapped out for another student.
   def kick(course, courses_hash)
 
     # Remove the course and student from one another.
@@ -179,7 +186,7 @@ class Student
       enrolled_string += "#{course}, "
     }
     if not enrolled_string == ""
-      enrolled_string = enrolled_string.chop.chop
+      enrolled_string = enrolled_string.chop().chop()
     else
       enrolled_string = "None"
     end
@@ -189,13 +196,13 @@ class Student
       reason_string += "#{reason} "
     }
     if not reason_string == ""
-      reason_string = reason_string.chop
+      reason_string = reason_string.chop()
     else
       reason_string = "N/A"
     end
 
     # Return the CSV-formatted array representation of a Student.
-    [@student_id, enrolled_string, reason_string]
+    return [@student_id, enrolled_string, reason_string]
   end
 
 end
