@@ -840,4 +840,5 @@ def create_reasons(courses_hash, students)
 
 end
 
+# Begin execution of the main method.
 main()
