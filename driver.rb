@@ -31,7 +31,6 @@ def main()
   end
 
   puts "Enter course constraints input file name:"
-  constraint_file_name = gets().chomp()
   while true
     constraint_file_name = gets().chomp()
     if not File.file?(constraint_file_name)
@@ -151,7 +150,13 @@ def process_courses(file_name, courses, courses_hash)
 
   header_read = false
   CSV.foreach("./#{file_name}") { |row|
-    
+
+    # See if the user mixed up preferences and constraints.
+    if row[4] != nil
+      puts "Please make sure you input a PREFERENCE file and a CONSTRAINT file, in that order. Exiting..."
+      exit()
+    end
+
     # Should ignore the header row from CSV files.
     if not header_read
       header_read = true
@@ -177,6 +182,12 @@ def process_students(file_name, students, courses_hash)
   header_read = false
   CSV.foreach("./#{file_name}") { |row|
     
+    # See if the user mixed up preferences and constraints.
+    if row[4] == nil
+      puts "Please make sure you input a PREFERENCE file and a CONSTRAINT file, in that order. Exiting..."
+      exit()
+    end
+
     # Should ignore the header row from CSV files.
     if not header_read
       header_read = true
