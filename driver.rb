@@ -26,8 +26,8 @@ def main()
   unenroll_at_min(courses, students, courses_hash)
 
   # Kick students from courses over their maximum, storing them temporarily.
-  single_enrolled = []
   not_enrolled = []
+  single_enrolled = []
   kick_students(courses, courses_hash, not_enrolled, single_enrolled)
 
   # Try reviving course sections with these kicked students.
@@ -39,8 +39,8 @@ def main()
   single_swap_double(courses, courses_hash, not_enrolled, single_enrolled)
 
   # Check for one final course-section revival using the remaining students.
-  single_enrolled = []
   not_enrolled = []
+  single_enrolled = []
   students.each { |student|
     if student.enrolled_courses.size() == 0 && (student.num_requests >= 1 && student.prefs.size() >= 1)
       not_enrolled.push(student)
@@ -49,6 +49,14 @@ def main()
     end
   }
   revive_courses(courses, courses_hash, not_enrolled, single_enrolled)
+
+  # Add resons to each student who is not enrolled in their max courses.
+  create_reasons(courses_hash, students)
+  CSV.open("./output.csv", "w") { |csv|
+    students.each { |student|
+      csv.puts(student.to_csv())
+    }
+  }
 
   # Write to the output files.
 
@@ -98,6 +106,10 @@ def main()
   puts "Students who requested 0 courses: #{requested_0}"
   
   puts "TOTAL: #{filled_1 + filled_2 + empty_1 + empty_2 + total_empty_2 + requested_0}"
+
+  students.each { |student|
+    puts student.to_s()
+  }
 
 end
 
@@ -810,5 +822,30 @@ def single_swap_double(courses, courses_hash, not_enrolled, single_enrolled)
   }
 
 end
+
+# Creates reasons for each student that was not enrolled in their original number
+# of requested courses.
+def create_reasons(courses_hash, students)
+
+  # Add reasons to the unenrolled students.
+  students.each { |student|
+    student.prefs().each { |pref|
+      
+      # Only consider students who are enrolled in less courses than
+      # the number that they requested.
+      if (student.enrolled_courses().size() < student.num_requests())
+        
+        # Add a reason if the student is not enrolled in this course.
+        if (not student.enrolled_courses().include?(pref))
+          student.reasons().push(courses_hash[pref].get_reason())
+        end
+
+      end
+
+    }
+  }
+
+end
+
 
 main()

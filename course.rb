@@ -59,4 +59,24 @@ class Course
     return count
   end
 
+  # Returns a String representing a reason why a student could not
+  # be enrolled in this course.
+  def get_reason()
+    
+    # If the course initially had 0 sections.
+    if @curr_num_sections == 0
+      return "#{@course_number}: No sections running this semester."
+    
+    # If all sections of a course filled up.
+    elsif @enrolled_students.size() == (@init_num_sections * @max)
+      return "#{@course_number}: All sections filled up with students of higher priority."
+
+    # Otherwise, some sections of the course aren't offered due to low
+    # enrollment in those courses.
+    else
+      return "#{@course_number}: Some sections filled up with students of higher priority, some sections could not be run due to low enrollemnt."
+    end
+
+  end
+
 end
