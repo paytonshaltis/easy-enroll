@@ -11,13 +11,16 @@ require "./course"
 
 def main()
   
+  # Input and output file names.
   pref_file_name = ""
   constraint_file_name = ""
   student_output_file_name = ""
   course_output_file_name = ""
+
+  # Data structures used for keeping track of all students and courses.
   courses = []
   students = []
-  courses_hash = {}
+  courses_hash = {}                          # Hashes String => Course.
 
   # Get the name of the preferences input file.
   puts "Enter student preference input file name:"
@@ -92,9 +95,9 @@ def main()
   not_enrolled = []
   single_enrolled = []
   students.each { |student|
-    if student.enrolled_courses.size() == 0 && (student.num_requests >= 1 && student.prefs.size() >= 1)
+    if student.enrolled_courses().size() == 0 && (student.num_requests() >= 1 && student.prefs().size() >= 1)
       not_enrolled.push(student)
-    elsif student.enrolled_courses.size() == 1 && (student.num_requests == 2 && student.prefs.size() >= 2)
+    elsif student.enrolled_courses().size() == 1 && (student.num_requests() == 2 && student.prefs().size() >= 2)
       single_enrolled.push(student)
     end
   }
@@ -113,11 +116,9 @@ def main()
   # Write the courses to the desired output file.
   CSV.open(course_output_file_name, "w") { |csv|
     courses.each { |course|
-      puts "#{course.course_number}: #{course.curr_num_sections} sections."
       
       # Add the course's running sections first.
       for i in (1..course.curr_num_sections) do
-        puts " >Section #{i} running."
         csv.puts(course.to_csv(i))
       end
 
@@ -129,52 +130,40 @@ def main()
     }
   }
 
-  # Print out some final results.
-  puts "============================================================================="
-  puts "FINAL RESULTS:"
-  puts "COURSES:"
-  courses.each { |course|
-    puts "  >> #{course.course_number()}, #{course.enrolled_students().size()} total, #{course.total_min} total min, #{course.total_max} total max, #{course.num_overenrolled_students()} overenrolled, "
-    course.enrolled_students.each { |student|
-      puts "Priority: #{student.priority}, Overenrolled: #{student.overenrolled}, Enrolled: #{student.enrolled_courses}, #{student.student_id}, #{student.student_year}, #{student.courses_taken}, #{student.semesters_left}, #{student.num_requests}, #{student.prefs}"
-    }
-  }
-
-  puts "ENROLLMENT STATS:"
-  filled_2 = 0
-  filled_1 = 0
-  empty_2 = 0
-  empty_1 = 0
-  total_empty_2 = 0
-  requested_0 = 0
+  # Tally up the totals for enrolled and unenrolled students.
+  enrolled_2_2 = 0
+  enrolled_1_2 = 0
+  enrolled_0_2 = 0
+  enrolled_1_1 = 0
+  enrolled_0_1 = 0
+  enrolled_0_0 = 0
   students.each { |student|
-    if student.enrolled_courses().size() == 3
-      puts "****************************MAJOR ERROR! STUDENT ENROLLED IN 3 COURSES!!"
-    elsif student.enrolled_courses().size() == 2
-      filled_2 += 1
+    if student.enrolled_courses().size() == 2
+      enrolled_2_2 += 1
     elsif student.enrolled_courses().size() == 1 && student.num_requests == 2 && student.prefs.size() >= 2
-      empty_2 += 1
+      enrolled_1_2 += 1
       puts "Priority: #{student.priority}, Overenrolled: #{student.overenrolled}, Enrolled: #{student.enrolled_courses}, #{student.student_id}, #{student.student_year}, #{student.courses_taken}, #{student.semesters_left}, #{student.num_requests}, #{student.prefs}"
     elsif student.enrolled_courses().size() == 1 && student.num_requests == 1
-      filled_1 += 1
+      enrolled_1_1 += 1
     elsif student.enrolled_courses().size() == 0 && student.num_requests == 1 && student.prefs.size() >= 1
-      empty_1 += 1
+      enrolled_0_1 += 1
     elsif student.enrolled_courses().size() == 0 && student.num_requests == 2 && student.prefs.size() >= 2
-      total_empty_2 += 1
+      enrolled_0_2 += 1
     elsif student.num_requests == 0
-      requested_0 += 1
+      enrolled_0_0 += 1
     end
 
   }
-  puts "Legitimate students who requested courses correctly (num requests >= prefs)"
-  puts "Students enrolled in 2/2 courses: #{filled_2}"
-  puts "Students enrolled in 1/2 courses: #{empty_2}"
-  puts "Students enrolled in 0/2 courses: #{total_empty_2}"
-  puts "Students enrolled in 1/1 courses: #{filled_1}"
-  puts "Students enrolled in 0/1 courses: #{empty_1}"
-  puts "Students who requested 0 courses: #{requested_0}"
-  
-  puts "TOTAL: #{filled_1 + filled_2 + empty_1 + empty_2 + total_empty_2 + requested_0}"
+
+  # Print out the final statistics to the standard output.
+  puts "ENROLLMENT TOTALS:"
+  puts "Students enrolled in 2/2 courses: #{enrolled_2_2}"
+  puts "Students enrolled in 1/2 courses: #{enrolled_1_2}"
+  puts "Students enrolled in 0/2 courses: #{enrolled_0_2}"
+  puts "Students enrolled in 1/1 courses: #{enrolled_1_1}"
+  puts "Students enrolled in 0/1 courses: #{enrolled_0_1}"
+  puts "Students who requested 0 courses: #{enrolled_0_0}"
+  puts "TOTAL: #{enrolled_2_2 + enrolled_1_2 + enrolled_0_2 + enrolled_1_1 + enrolled_0_1 + enrolled_0_0}"
 
 end
 
@@ -189,7 +178,6 @@ def process_courses(file_name, courses, courses_hash)
     # Should ignore the header row from CSV files.
     if not header_read
       header_read = true
-      puts "Skipping course header..."
       next
     end
 
@@ -220,7 +208,6 @@ def process_students(file_name, students, courses_hash)
     # Should ignore the header row from CSV files.
     if not header_read
       header_read = true
-      puts "Skipping student header..."
       next
     end
 
