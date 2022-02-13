@@ -19,7 +19,7 @@ def main()
   students = []
   courses_hash = {}
 
-  # Get the names of the input and output files from the user.
+  # Get the name of the preferences input file.
   puts "Enter student preference input file name:"
   while true
     pref_file_name = gets().chomp()
@@ -30,6 +30,7 @@ def main()
     end
   end
 
+  # Get the name of the constraints input file.
   puts "Enter course constraints input file name:"
   while true
     constraint_file_name = gets().chomp()
@@ -40,10 +41,20 @@ def main()
     end
   end
   
+  # Gets the name of the students output file.
   puts "Enter student output file name (will be overwritten if it already exists):"
   student_output_file_name = gets().chomp()
+
+  # Gets the name of the courses output file.
   puts "Enter course output file name (will be overwritten if it already exists):"
-  course_output_file_name = gets().chomp()
+  while true
+    course_output_file_name = gets().chomp()
+    if course_output_file_name == student_output_file_name
+      puts "Output file names must not be the same. Enter a valid file name:"
+    else
+      break
+    end
+  end
 
   # Enroll all students into all of their preferences.
   process_courses(constraint_file_name, courses, courses_hash)
@@ -88,6 +99,11 @@ def main()
     students.each { |student|
       csv.puts(student.to_csv())
     }
+  }
+
+  # Write the courses to the desired output file.
+  CSV.open(course_output_file_name, "w") { |csv|
+    
   }
 
   # Print out some final results.
@@ -136,10 +152,6 @@ def main()
   puts "Students who requested 0 courses: #{requested_0}"
   
   puts "TOTAL: #{filled_1 + filled_2 + empty_1 + empty_2 + total_empty_2 + requested_0}"
-
-  students.each { |student|
-    puts student.to_s()
-  }
 
 end
 
