@@ -921,6 +921,7 @@ def main()
       filled_2 += 1
     elsif student.enrolled_courses().size() == 1 && student.num_requests == 2 && student.prefs.size() >= 2
       empty_2 += 1
+      puts "Priority: #{student.priority}, Overenrolled: #{student.overenrolled}, Enrolled: #{student.enrolled_courses}, #{student.student_id}, #{student.student_year}, #{student.courses_taken}, #{student.semesters_left}, #{student.num_requests}, #{student.prefs}"
     elsif student.enrolled_courses().size() == 1 && student.num_requests == 1
       filled_1 += 1
     elsif student.enrolled_courses().size() == 0 && student.num_requests == 1 && student.prefs.size() >= 1
