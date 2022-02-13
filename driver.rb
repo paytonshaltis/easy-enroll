@@ -43,7 +43,14 @@ def main()
   
   # Gets the name of the students output file.
   puts "Enter student output file name (will be overwritten if it already exists):"
-  student_output_file_name = gets().chomp()
+  while true
+    student_output_file_name = gets().chomp()
+    if student_output_file_name == ""
+      puts "Output file name cannot be blank. Enter a valid file name:"
+    else
+      break
+    end
+  end
 
   # Gets the name of the courses output file.
   puts "Enter course output file name (will be overwritten if it already exists):"
@@ -51,6 +58,8 @@ def main()
     course_output_file_name = gets().chomp()
     if course_output_file_name == student_output_file_name
       puts "Output file names must not be the same. Enter a valid file name:"
+    elsif course_output_file_name == ""
+      puts "Output file name cannot be blank. Enter a valid file name:"
     else
       break
     end
