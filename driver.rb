@@ -112,7 +112,19 @@ def main()
 
   # Write the courses to the desired output file.
   CSV.open(course_output_file_name, "w") { |csv|
-    
+    courses.each { |course|
+      puts "#{course.course_number}: #{course.curr_num_sections} sections."
+      
+      # For courses that have at least 1 section.
+      for i in (1..course.curr_num_sections) do
+        csv.puts(course.to_csv(i))
+      end
+
+      # For courses that have 0 sections.
+      if course.curr_num_sections == 0
+        
+      end
+    }
   }
 
   # Print out some final results.

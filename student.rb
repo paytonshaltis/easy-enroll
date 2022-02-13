@@ -172,8 +172,7 @@ class Student
 
   end
 
-  # The toString() method for neatly printing students. Prints
-  # in CSV format for writing to output files.
+  # Returns an array of values to be written to CSV files.
   def to_csv()
     enrolled_string = ""
     reason_string = ""
@@ -199,7 +198,7 @@ class Student
       reason_string = "N/A"
     end
 
-    # Return the CSV-formatted Student string.
+    # Return the CSV-formatted array representation of a Student.
     [@student_id, enrolled_string, reason_string]
   end
 

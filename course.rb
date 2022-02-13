@@ -78,5 +78,16 @@ class Course
     end
 
   end
+  
+  # Returns an array of values to be written to CSV files. Only returns
+  # values for the section specified by the sole parameter.
+  def to_csv(section_number)
+    
+    student_ids = "student ids here"
+    seats_filled = 5
+    open_seats = @max - seats_filled
+
+    [@course_number, section_number, student_ids, seats_filled, open_seats, "Yes"]
+  end
 
 end
