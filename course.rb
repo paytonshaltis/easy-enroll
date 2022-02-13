@@ -83,11 +83,22 @@ class Course
   # values for the section specified by the sole parameter.
   def to_csv(section_number)
     
-    student_ids = "student ids here"
-    seats_filled = 5
+    student_ids = ""
+    seats_filled = 0
+    index = section_number - 1
+
+    # Consider only the students in this section, keep track of seats filled.
+    while index < @enrolled_students.size()
+      student_ids += "#{@enrolled_students[index].student_id()}, "
+      seats_filled += 1
+      index += curr_num_sections
+    end
+    student_ids = student_ids.chop().chop()
+
+    # Calculate the number of open seats in this section
     open_seats = @max - seats_filled
 
-    [@course_number, section_number, student_ids, seats_filled, open_seats, "Yes"]
+    [@course_number, "0#{section_number.to_s()}", student_ids, seats_filled, open_seats, "Yes"]
   end
 
 end

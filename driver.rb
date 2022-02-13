@@ -115,15 +115,17 @@ def main()
     courses.each { |course|
       puts "#{course.course_number}: #{course.curr_num_sections} sections."
       
-      # For courses that have at least 1 section.
+      # Add the course's running sections first.
       for i in (1..course.curr_num_sections) do
+        puts " >Section #{i} running."
         csv.puts(course.to_csv(i))
       end
 
-      # For courses that have 0 sections.
-      if course.curr_num_sections == 0
-        
+      # Add the course's non-running sections next.
+      for i in (course.curr_num_sections()...course.init_num_sections())
+        csv.puts([course.course_number(), "0#{i + 1}", "None", 0, course.max(), "No"])
       end
+
     }
   }
 
@@ -184,17 +186,17 @@ def process_courses(file_name, courses, courses_hash)
   header_read = false
   CSV.foreach("./#{file_name}") { |row|
 
-    # See if the user mixed up preferences and constraints.
-    if row[4] != nil
-      puts "Please make sure you input a PREFERENCE file and a CONSTRAINT file, in that order. Exiting..."
-      exit()
-    end
-
     # Should ignore the header row from CSV files.
     if not header_read
       header_read = true
       puts "Skipping course header..."
       next
+    end
+
+    # See if the user mixed up preferences and constraints.
+    if row[4] != nil
+      puts "Please make sure you input a PREFERENCE file and a CONSTRAINT file, in that order. Exiting..."
+      exit()
     end
 
     # Add the course to the course list.
@@ -214,18 +216,18 @@ def process_students(file_name, students, courses_hash)
 
   header_read = false
   CSV.foreach("./#{file_name}") { |row|
-    
-    # See if the user mixed up preferences and constraints.
-    if row[4] == nil
-      puts "Please make sure you input a PREFERENCE file and a CONSTRAINT file, in that order. Exiting..."
-      exit()
-    end
 
     # Should ignore the header row from CSV files.
     if not header_read
       header_read = true
       puts "Skipping student header..."
       next
+    end
+
+    # See if the user mixed up preferences and constraints.
+    if row[4] == nil
+      puts "Please make sure you input a PREFERENCE file and a CONSTRAINT file, in that order. Exiting..."
+      exit()
     end
 
     # Create the Student object.
