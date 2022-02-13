@@ -1,3 +1,10 @@
+# Name: Payton Shaltis
+# Project name: Assignment 1: EasyEnroll
+# Description: An algorithm that determines the best college course enrollment strategy according to a set of student preferences and course constraings.
+# Filename: driver.rb
+# Description: Contains the main() method with the actual algorithm implementation.
+# Last modified on: February 12, 2022
+
 require "csv"
 require "./student"
 require "./course"
@@ -496,7 +503,7 @@ def kick_students(courses, courses_hash, not_enrolled, single_enrolled)
       # now, since this is audited at the end of the process.
       kicked_student = course.enrolled_students.pop()
       puts "#{kicked_student.student_id} has been KICKED from #{course.course_number}."
-      kicked_student.drop(course.course_number, "#{course.course_number} filled up.", courses_hash)
+      kicked_student.kick(course.course_number, courses_hash)
 
       # Determine where to put this student. We can be certain that 
       # these students either have 0 or 1 enrollment, since they were
@@ -587,8 +594,8 @@ def unenrolled_swap_double(courses, courses_hash, not_enrolled, single_enrolled)
       puts " >> #{marked_course}"
       puts " ###"
 
-      # Drop the student from this course, adding them to the appropriate array.
-      marked_student.drop(marked_course, "Removed from #{marked_course} due to higher priority student needing enrollment.", courses_hash)
+      # Kick the student from this course, adding them to the appropriate array.
+      marked_student.kick(marked_course, courses_hash)
       single_enrolled.push(marked_student)
 
       # Enroll the current student in this course, marking them for 
@@ -681,8 +688,8 @@ def unenrolled_swap_single(courses, courses_hash, not_enrolled, single_enrolled)
       puts " >> #{marked_course}"
       puts " ###"
 
-      # Drop the student from this course, adding them to the appropriate array.
-      marked_student.drop(marked_course, "Removed from #{marked_course} due to higher priority student needing enrollment.", courses_hash)
+      # Kick the student from this course, adding them to the appropriate array.
+      marked_student.kick(marked_course, courses_hash)
       not_enrolled.push(marked_student)
 
       # Enroll the current student in this course, marking them for 
@@ -781,8 +788,8 @@ def single_swap_double(courses, courses_hash, not_enrolled, single_enrolled)
       puts " >> #{marked_course}"
       puts " ###"
 
-      # Drop the student from this course, adding them to the appropriate array.
-      marked_student.drop(marked_course, "Removed from #{marked_course} due to higher priority student wanting 2 courses.", courses_hash)
+      # Kick the student from this course, adding them to the appropriate array.
+      marked_student.kick(marked_course, courses_hash)
       single_enrolled.push(marked_student)
 
       # Enroll the current student in this course, marking them for 

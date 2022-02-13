@@ -1,3 +1,10 @@
+# Name: Payton Shaltis
+# Project name: Assignment 1: EasyEnroll
+# Description: An algorithm that determines the best college course enrollment strategy according to a set of student preferences and course constraings.
+# Filename: course.rb
+# Description: Contains the class implementation for representing Courses.
+# Last modified on: February 12, 2022
+
 # Course class for representing courses.
 class Course
 
@@ -39,28 +46,6 @@ class Course
   # Returns the total number of courses available this semester.
   def Course.total_courses()
     @@total_courses
-  end
-
-  # Drops anywhere from 0 to all sections of a class based on the
-  # current number of enrolled students. Returns true if all sections
-  # of the course are to be dropped, and the course should be deleted
-  # and all students dropped.
-  def drop_sections()
-  
-    while enrolled_students.size() < total_min()
-      @curr_num_sections -= 1
-      puts "A section of #{course_number} was dropped due to low enrollment."
-    end
-
-    return @curr_num_sections == 0
-  
-  end
-
-  # Drops all students from the course in the case that no sections run.
-  def drop_all_students(courses_hash)
-    @enrolled_students.each { |student|
-      student.drop(self.course_number(), "No sections of #{self.course_number()} could run because they could not be filled.", courses_hash)
-    }
   end
 
   # Returns the number of overenrolled students in this course.

@@ -1,3 +1,10 @@
+# Name: Payton Shaltis
+# Project name: Assignment 1: EasyEnroll
+# Description: An algorithm that determines the best college course enrollment strategy according to a set of student preferences and course constraings.
+# Filename: student.rb
+# Description: Contains the class implementation for representing Students.
+# Last modified on: February 12, 2022
+
 # Student class for representing students.
 class Student
 
@@ -155,12 +162,9 @@ class Student
 
   end
 
-  # 'Drops' a student from a course. This action is performed
-  # when all sections of a class are unable to be run.
-  def drop(course, reason, courses_hash)
-    
-    # Add the reason for not getting into the class.
-    @reasons.push(reason)
+  # 'Kicks' a student from a course. This action is performed
+  # when a course is above its total maximum number of students.
+  def kick(course, courses_hash)
 
     # Remove the course and student from one another.
     @enrolled_courses.delete(course)
