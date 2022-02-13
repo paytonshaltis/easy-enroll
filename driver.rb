@@ -5,48 +5,14 @@ require "./course"
 def main()
   
   courses = []
-  courses_hash = {}
   students = []
+  courses_hash = {}
 
-  # Read in the course info from constraints.csv
-  header_read = false
-  CSV.foreach("./input-files/course_constraints.csv") { |row|
-    
-    # Should ignore the header row from CSV files.
-    if not header_read
-      header_read = true
-      puts "Skipping course header..."
-      next
-    end
+  # Read in all of the courses, adding them to the array and hash.
+  process_courses("course_constraints.csv", courses, courses_hash)
 
-    # Add the course to the course list.
-    addedCourse = Course.new(row)
-    courses.push(addedCourse)
-
-    # Add the course to the course hash.
-    courses_hash[addedCourse.course_number()] = addedCourse
-  }
-
-  # Read in the preferences from prefs.csv
-  header_read = false
-  CSV.foreach("./input-files/student_prefs.csv") { |row|
-    
-    # Should ignore the header row from CSV files.
-    if not header_read
-      header_read = true
-      puts "Skipping student header..."
-      next
-    end
-
-    # Create the Student object.
-    addedStudent = Student.new(row)
-
-    # Enroll the student in all of their preferences.
-    addedStudent.enroll(addedStudent.prefs, courses_hash)
-
-    # Add the student to the array of students.
-    students.push(addedStudent)
-  }
+  # Read in all of the students, adding them to the array.
+  process_students("student_prefs.csv", students, courses_hash)
 
   # Print all of the students in each course.
   courses.each { |course|
@@ -462,18 +428,6 @@ def main()
   # only students enrolled in 2 courses will be compared, so by this point, NO 
   # more students will become unenrolled.
 
-  # Prove that no students become unenrolled after this process.
-  count = 0
-  students.each { |student|
-
-    # Only count students that are not enrolled in any course, as long
-    # as they have requested a course
-    if student.enrolled_courses.size() == 0 && student.num_requests > 0
-      count += 1
-    end
-  }
-  puts "Total unenrolled students: #{count}"
-
   # Consider all of the students who are single enrolled
   puts "SINGLE ENROLLED --> 2X ENROLLED"
   remove_from_single_enrolled = []
@@ -566,23 +520,14 @@ def main()
     single_enrolled.delete(student)
   }
 
-  # Prove that no students become unenrolled after this process.
-  count = 0
-  students.each { |student|
-
-    # Only count students that are not enrolled in any course, as long
-    # as they have requested a course
-    if student.enrolled_courses.size() == 0 && student.num_requests > 0
-      count += 1
-    end
-  }
-  puts "Total unenrolled students: #{count}"
-
-  # The final thing to do is try reviving a course with students who are unenrolled
-  # and single enrolled.
+  # Need to store a reference to the remaining unenrolled students, as well as
+  # the remaining students in 1 course who requested 2 courses to see if they 
+  # can be used to revive any course sections available.
   single_enrolled = []
   not_enrolled = []
 
+  # Want to make sure that only students who can be enrolled in a course are
+  # selected, meaning that we must check their num_requests and prefs.
   students.each { |student|
     if student.enrolled_courses.size() == 0 && (student.num_requests >= 1 && student.prefs.size() >= 1)
       not_enrolled.push(student)
@@ -590,9 +535,6 @@ def main()
       single_enrolled.push(student)
     end
   }
-
-  puts "Single enrolled: #{single_enrolled.size()}"
-  puts "Not enrolled: #{not_enrolled.size()}"
 
   # Call the revive_courses method to see if any courses can be revived. Enroll
   # students into these courses accordingly.
@@ -683,6 +625,58 @@ def main()
 
 end
 
+# Reads in all course constraint entries from the provided CSV filename.
+# Creates the Course objects and stores them into the provided array and
+# hash for later use in the algorithm.
+def process_courses(file_name, courses, courses_hash)
+
+  header_read = false
+  CSV.foreach("./#{file_name}") { |row|
+    
+    # Should ignore the header row from CSV files.
+    if not header_read
+      header_read = true
+      puts "Skipping course header..."
+      next
+    end
+
+    # Add the course to the course list.
+    addedCourse = Course.new(row)
+    courses.push(addedCourse)
+
+    # Add the course to the course hash.
+    courses_hash[addedCourse.course_number()] = addedCourse
+  }
+
+end
+
+# Reads in all student preference entries from the provided CSV filename. 
+# Creates and enrolls each Student object into all of their preferences,
+# storing them into the provided array for later use in the algorithm.
+def process_students(file_name, students, courses_hash)
+
+  header_read = false
+  CSV.foreach("./#{file_name}") { |row|
+    
+    # Should ignore the header row from CSV files.
+    if not header_read
+      header_read = true
+      puts "Skipping student header..."
+      next
+    end
+
+    # Create the Student object.
+    addedStudent = Student.new(row)
+
+    # Enroll the student in all of their preferences.
+    addedStudent.enroll(addedStudent.prefs, courses_hash)
+
+    # Add the student to the array of students.
+    students.push(addedStudent)
+  }
+
+end
+
 # Returns a reference to the student in course_name with the lowest
 # priority who is enrolled in num_enrolled courses.
 def lowest_priority_student(course_name, courses_hash, num_enrolled)
@@ -744,15 +738,10 @@ def revive_courses(courses, courses_hash, not_enrolled, single_enrolled)
 
   puts prefs_hash
 
-  # Need to keep track of which students will be removed after they are enrolled.
-  # Removing during each() iterations causes issues; best to wait until the end.
-  remove_from_not_enrolled = []
-  remove_from_single_enrolled = []
-
   # Need to traverse through each course.
   courses.each { |course|
   
-    # Determine if it can be revived
+    # Determine if it can be revived.
     while course.init_num_sections() > course.curr_num_sections() && prefs_hash[course.course_number] > course.min()
       puts "#{course.course_number} can revive a section!"
       
@@ -766,6 +755,7 @@ def revive_courses(courses, courses_hash, not_enrolled, single_enrolled)
         
       # Start with the unenrolled students.
       not_enrolled.each { |student|
+        
         if student.prefs.include?(course.course_number)
           
           # Enroll this student in the course.
@@ -780,9 +770,12 @@ def revive_courses(courses, courses_hash, not_enrolled, single_enrolled)
           remove_from_not_enrolled.push(student)
           total_added += 1
         end
+
+        # See if the course section is now full.
         if total_added == course.max()
           break
         end
+
       }
 
       # Remove each of the marked students from the not_enrolled array.
