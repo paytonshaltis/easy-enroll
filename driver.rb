@@ -21,12 +21,29 @@ def main()
 
   # Get the names of the input and output files from the user.
   puts "Enter student preference input file name:"
-  pref_file_name = gets().chomp()
+  while true
+    pref_file_name = gets().chomp()
+    if not File.file?(pref_file_name)
+      puts "File does not exist. Enter a valid file name:"
+    else
+      break
+    end
+  end
+
   puts "Enter course constraints input file name:"
   constraint_file_name = gets().chomp()
-  puts "Enter student output file name:"
+  while true
+    constraint_file_name = gets().chomp()
+    if not File.file?(constraint_file_name)
+      puts "File does not exist. Enter a valid file name:"
+    else
+      break
+    end
+  end
+  
+  puts "Enter student output file name (will be overwritten if it already exists):"
   student_output_file_name = gets().chomp()
-  puts "Enter course output file name:"
+  puts "Enter course output file name (will be overwritten if it already exists):"
   course_output_file_name = gets().chomp()
 
   # Enroll all students into all of their preferences.
