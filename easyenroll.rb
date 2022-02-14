@@ -20,44 +20,53 @@ def main()
   # Data structures used for keeping track of all students and courses.
   courses = []
   students = []
-  courses_hash = {}                          # Hashes String => Course.
+
+  # Hashes String => Course.
+  courses_hash = {}
 
   # Get the name of the constraints input file.
   puts "Enter course constraints input file name:"
   while true
+
     constraint_file_name = gets().chomp()
     if not File.file?(constraint_file_name)
       puts "File does not exist. Enter a valid file name:"
     else
       break
     end
+
   end
   
   # Get the name of the preferences input file.
   puts "Enter student preference input file name:"
   while true
+
     pref_file_name = gets().chomp()
     if not File.file?(pref_file_name)
       puts "File does not exist. Enter a valid file name:"
     else
       break
     end
+
   end
 
   # Gets the name of the courses output file.
   puts "Enter course output file name (will be overwritten if it already exists):"
   while true
+    
     course_output_file_name = gets().chomp()
     if course_output_file_name == ""
       puts "Output file name cannot be blank. Enter a valid file name:"
     else
       break
     end
+
   end
 
   # Gets the name of the students output file.
   puts "Enter student output file name (will be overwritten if it already exists):"
   while true
+    
     student_output_file_name = gets().chomp()
     if student_output_file_name == course_output_file_name
       puts "Output file names must not be the same. Enter a valid file name:"
@@ -66,6 +75,7 @@ def main()
     else
       break
     end
+
   end
 
   # Enroll all students into all of their preferences.
@@ -95,11 +105,13 @@ def main()
   not_enrolled = []
   single_enrolled = []
   students.each { |student|
+    
     if student.enrolled_courses().size() == 0 && (student.num_requests() >= 1 && student.prefs().size() >= 1)
       not_enrolled.push(student)
     elsif student.enrolled_courses().size() == 1 && (student.num_requests() == 2 && student.prefs().size() >= 2)
       single_enrolled.push(student)
     end
+
   }
   revive_courses(courses, courses_hash, not_enrolled, single_enrolled)
 
@@ -112,7 +124,7 @@ def main()
     courses.each { |course|
       
       # Add the course's running sections first.
-      for i in (1..course.curr_num_sections) do
+      for i in (1..course.curr_num_sections()) do
         csv.puts(course.to_csv(i))
       end
 
@@ -141,17 +153,18 @@ def main()
   enrolled_0_0 = 0
   enrolled_m_l = 0
   students.each { |student|
+    
     if student.enrolled_courses().size() == 2
       enrolled_2_2 += 1
-    elsif student.enrolled_courses().size() == 1 && student.num_requests == 2 && student.prefs.size() >= 2
+    elsif student.enrolled_courses().size() == 1 && student.num_requests() == 2 && student.prefs.size() >= 2
       enrolled_1_2 += 1
-    elsif student.enrolled_courses().size() == 1 && student.num_requests == 1
+    elsif student.enrolled_courses().size() == 1 && student.num_requests() == 1
       enrolled_1_1 += 1
-    elsif student.enrolled_courses().size() == 0 && student.num_requests == 1 && student.prefs.size() >= 1
+    elsif student.enrolled_courses().size() == 0 && student.num_requests() == 1 && student.prefs.size() >= 1
       enrolled_0_1 += 1
-    elsif student.enrolled_courses().size() == 0 && student.num_requests == 2 && student.prefs.size() >= 2
+    elsif student.enrolled_courses().size() == 0 && student.num_requests() == 2 && student.prefs.size() >= 2
       enrolled_0_2 += 1
-    elsif student.num_requests == 0
+    elsif student.num_requests() == 0
       enrolled_0_0 += 1
     elsif student.num_requests() > student.prefs().size()
       enrolled_m_l += 1
@@ -170,11 +183,6 @@ def main()
   puts "Students who requested 0 courses: #{enrolled_0_0}"
   puts "Students who requested more courses than preferences: #{enrolled_m_l}"
   puts "TOTAL: #{enrolled_2_2 + enrolled_1_2 + enrolled_0_2 + enrolled_1_1 + enrolled_0_1 + enrolled_0_0 + enrolled_m_l}"
-
-  # Print out all students and their priorities.
-  students.each { |student|
-    puts "Priority: #{student.priority}: #{student.student_id}, #{student.student_year}, #{student.courses_taken}, #{student.semesters_left}, #{student.num_requests}, #{student.prefs}"
-  }
 
 end
 
@@ -204,6 +212,7 @@ def process_courses(file_name, courses, courses_hash)
 
     # Add the course to the course hash.
     courses_hash[addedCourse.course_number()] = addedCourse
+
   }
 
 end
@@ -236,6 +245,7 @@ def process_students(file_name, students, courses_hash)
 
     # Add the student to the array of students.
     students.push(addedStudent)
+
   }
 
 end
@@ -249,7 +259,7 @@ def unenroll_above_max(courses, students, courses_hash)
     if course.enrolled_students.size() > course.total_max()
 
       # Determine the max number of successful unenrollments allowed.
-      max_unenrollments = course.enrolled_students.size() - course.total_max()
+      max_unenrollments = course.enrolled_students().size() - course.total_max()
 
       # Determine which students will be unenrolled.
       unenrolling = []
@@ -263,7 +273,7 @@ def unenroll_above_max(courses, students, courses_hash)
         end
       }
 
-      # Remove these students now.
+      # Unenroll all of the marked students.
       unenrolling.each { |student|
         student.unenroll(course.course_number, courses_hash)
       }
@@ -282,7 +292,7 @@ def unenroll_above_min(courses, students, courses_hash)
     if course.enrolled_students.size() > course.total_min()
     
       # Determine the max number of successful unenrollments allowed.
-      max_unenrollments = course.enrolled_students.size() - course.total_min()
+      max_unenrollments = course.enrolled_students().size() - course.total_min()
 
       # Determine which students will be unenrolled.
       unenrolling = []
@@ -296,7 +306,7 @@ def unenroll_above_min(courses, students, courses_hash)
         end
       }
       
-      # Removing these students now.
+      # Unenroll all of the marked students.
       unenrolling.each { |student|
         student.unenroll(course.course_number, courses_hash)
       }
@@ -312,11 +322,9 @@ def unenroll_below_min(courses, students, courses_hash)
 
   # For each course that is below its total min.
   courses.each { |course|
-
-    # Start with courses already below their minimum.
+    
+    # Get rid of sections until they can all be filled
     while course.enrolled_students.size() < course.total_min()
-      
-      # Get rid of sections until they can all be filled
       course.curr_num_sections -= 1
     end
     
@@ -338,7 +346,7 @@ def unenroll_below_min(courses, students, courses_hash)
         end
       }
       
-      # Removing these students now.
+      # Unenroll all of the marked students.
       unenrolling.each { |student|
         student.unenroll(course.course_number, courses_hash)
       }
@@ -383,7 +391,7 @@ def unenroll_at_min(courses, students, courses_hash)
       end
     }
     
-    # Removing these students now.
+    # Unenroll all of the marked students.
     unenrolling.each { |student|
       student.unenroll(selected_course.course_number, courses_hash)
     }
