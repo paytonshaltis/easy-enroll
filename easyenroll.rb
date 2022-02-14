@@ -275,7 +275,7 @@ def unenroll_above_max(courses, students, courses_hash)
 
       # Unenroll all of the marked students.
       unenrolling.each { |student|
-        student.unenroll(course.course_number, courses_hash)
+        student.unenroll(course.course_number(), courses_hash)
       }
 
     end
@@ -308,7 +308,7 @@ def unenroll_above_min(courses, students, courses_hash)
       
       # Unenroll all of the marked students.
       unenrolling.each { |student|
-        student.unenroll(course.course_number, courses_hash)
+        student.unenroll(course.course_number(), courses_hash)
       }
 
     end
@@ -348,7 +348,7 @@ def unenroll_below_min(courses, students, courses_hash)
       
       # Unenroll all of the marked students.
       unenrolling.each { |student|
-        student.unenroll(course.course_number, courses_hash)
+        student.unenroll(course.course_number(), courses_hash)
       }
 
     end
@@ -368,7 +368,7 @@ def unenroll_at_min(courses, students, courses_hash)
     # Determine the course with the greatest (overenrollemnts:min) ratio.
     selected_course = nil
     courses.each { |course|
-      if ((not selected_course) || (course.num_overenrolled_students().to_f / course.min()) > (selected_course.num_overenrolled_students().to_f / selected_course.min()))
+      if ((not selected_course) || (course.num_overenrolled_students().to_f / course.min()) > (selected_course.num_overenrolled_students().to_f() / selected_course.min()))
         selected_course = course
       end
     }
@@ -393,7 +393,7 @@ def unenroll_at_min(courses, students, courses_hash)
     
     # Unenroll all of the marked students.
     unenrolling.each { |student|
-      student.unenroll(selected_course.course_number, courses_hash)
+      student.unenroll(selected_course.course_number(), courses_hash)
     }
   
   end
@@ -411,25 +411,25 @@ def lowest_priority_student(course_name, courses_hash, num_enrolled)
   lowest_student = nil
 
   # Find the correct student from the class.
-  course_ref.enrolled_students.each { |student|
+  course_ref.enrolled_students().each { |student|
     
-    # If lowest_student is nil, track the first student.
-    if (not lowest_student) && (student.enrolled_courses.size() == num_enrolled)
+    # If lowest_student is nil, track the first student who qualifies.
+    if (not lowest_student) && (student.enrolled_courses().size() == num_enrolled)
       lowest_student = student
 
     # Compare priorities and course enrollments to update the tracked student.
-    elsif (lowest_student) && (student.priority() < lowest_student.priority()) && student.enrolled_courses().size() == num_enrolled
+    elsif (lowest_student) && (student.priority() < lowest_student.priority()) && (student.enrolled_courses().size() == num_enrolled)
       lowest_student = student
     end
 
   }
 
   # Return the student. This may be nil if none qualify.
-  lowest_student
+  return lowest_student
 
 end
 
-# Attempts to revive courses based on the contents of the an array on unenrolled
+# Attempts to revive courses based on the contents of the an array of unenrolled
 # students and an array of singly-enrolled students who can take another course.
 def revive_courses(courses, courses_hash, not_enrolled, single_enrolled)
   
@@ -456,6 +456,7 @@ def revive_courses(courses, courses_hash, not_enrolled, single_enrolled)
         end
       
       end
+
     }
   }
 
@@ -463,7 +464,7 @@ def revive_courses(courses, courses_hash, not_enrolled, single_enrolled)
   courses.each { |course|
   
     # Determine if it can be revived.
-    while course.init_num_sections() > course.curr_num_sections() && prefs_hash[course.course_number] > course.min()
+    while course.init_num_sections() > course.curr_num_sections() && prefs_hash[course.course_number()] > course.min()
       
       # Increase the course's section count.
       course.curr_num_sections += 1
@@ -476,19 +477,21 @@ def revive_courses(courses, courses_hash, not_enrolled, single_enrolled)
       # Start with the unenrolled students.
       not_enrolled.each { |student|
         
-        if student.prefs.include?(course.course_number)
+        # Only enroll the student if the course is in their preferences.
+        if student.prefs().include?(course.course_number())
           
           # Enroll this student in the course.
-          student.enroll(course.course_number, courses_hash)
+          student.enroll(course.course_number(), courses_hash)
 
           # Subtract one from all of their prefs in the hash.
-          student.prefs.each { |pref|
+          student.prefs().each { |pref|
             prefs_hash[pref] -= 1
           }
 
           # Mark the student to be removed from this array.
           remove_from_not_enrolled.push(student)
           total_added += 1
+
         end
 
         # See if the course section is now full.
@@ -512,23 +515,27 @@ def revive_courses(courses, courses_hash, not_enrolled, single_enrolled)
       single_enrolled.each { |student|
 
         # Make sure that they aren't already enrolled in this course.
-        if student.prefs.include?(course.course_number) && (not student.enrolled_courses.include?(course.course_number))
+        if student.prefs().include?(course.course_number()) && (not student.enrolled_courses().include?(course.course_number()))
           
           # Enroll this student in the course.
-          student.enroll(course.course_number, courses_hash)
+          student.enroll(course.course_number(), courses_hash)
 
           # Subtract one from all of their prefs.
-          student.prefs.each { |pref|
+          student.prefs().each { |pref|
             prefs_hash[pref] -= 1
           }
 
           # Mark the student to be removed from this array.
           remove_from_single_enrolled.push(student)
           total_added += 1
+
         end
+
+        # See if the course section is now full.
         if total_added == course.max()
           break
         end
+
       }
 
       # Remove these students from the single enrolled array.
@@ -537,7 +544,9 @@ def revive_courses(courses, courses_hash, not_enrolled, single_enrolled)
       }
 
     end
+
   }
+
 end
 
 # Kicks as many students as needed from courses who are above their maximum
@@ -546,21 +555,16 @@ end
 def kick_students(courses, courses_hash, not_enrolled, single_enrolled)
 
   # Traverse through each course, remove students from those that are over
-  # their max (all courses either at or above min, even if min is 0).
+  # their max (right now, all courses either at or above min, even if min is 0).
   courses.each { |course|
+    while course.enrolled_students().size() > course.total_max()
 
-    while course.enrolled_students.size() > course.total_max()
-
-      # It actually doesn't matter which student we kick for
-      # now, since this is audited at the end of the process.
+      # Pop a student, will be considered for swapping later.
       kicked_student = course.enrolled_students.pop()
-      kicked_student.kick(course.course_number, courses_hash)
+      kicked_student.kick(course.course_number(), courses_hash)
 
-      # Determine where to put this student. We can be certain that 
-      # these students either have 0 or 1 enrollment, since they were
-      # just kicked from a class, so they cannot possibly have 2.
-      # Duplicates are OK; we focus on the unenrolled first.
-      if kicked_student.enrolled_courses.size() == 0
+      # Store the student in the appropriate array, based on enrollments.
+      if kicked_student.enrolled_courses().size() == 0
         not_enrolled.push(kicked_student)
       else
         single_enrolled.push(kicked_student)
