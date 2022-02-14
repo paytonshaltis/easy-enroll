@@ -16,7 +16,7 @@ class Student
   attr_accessor :enrolled_courses, :reasons, :priority
 
   # Initializes the Student using a row from the CSV file.
-  def initialize(student_info, courses, courses_hash)
+  def initialize(student_info)
 
     # Variables straight from CSV file.
     @student_id = student_info[0]
@@ -33,7 +33,7 @@ class Student
     @reasons = []
 
     # Calculates the priority of the student.
-    calculate_priority(courses, courses_hash)
+    calculate_priority()
 
   end
 
@@ -66,7 +66,7 @@ class Student
 
   # Returns the priority level of a student based on the 
   # factors described in the assignment. Returns an integer.
-  def calculate_priority(courses, courses_hash)
+  def calculate_priority()
   
     # A higher result indicates a higher priority for classes.
     @priority = 0

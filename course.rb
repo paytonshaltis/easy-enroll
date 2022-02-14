@@ -27,18 +27,18 @@ class Course
     @min = course_info[2].to_i()
     @max = course_info[3].to_i()
 
-    # Need to calculate other course data.
+    # Variables NOT from the CSV file.
     @enrolled_students = []
     @@total_courses += 1
 
   end
 
-  # Returns the total minimum students across all course sections.
+  # Returns the total minimum students across all of this course's sections.
   def total_min()
     @curr_num_sections * @min
   end
 
-  # Returns the total maximum students across all course sections.
+  # Returns the total maximum students across all of this course's sections.
   def total_max()
     @curr_num_sections * @max
   end
@@ -59,7 +59,7 @@ class Course
     return count
   end
 
-  # Returns a String representing a reason why a student could not
+  # Returns a string representing a reason why a student could not
   # be enrolled in this course.
   def get_reason()
     

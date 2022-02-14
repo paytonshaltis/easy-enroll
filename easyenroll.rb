@@ -1,7 +1,7 @@
 # Name: Payton Shaltis
 # Project name: Assignment 1: EasyEnroll
 # Description: An algorithm that determines the best college course enrollment strategy according to a set of student preferences and course constraings.
-# Filename: driver.rb
+# Filename: easyenroll.rb
 # Description: Contains the main() method with the actual algorithm implementation.
 # Last modified on: February 13, 2022
 
@@ -70,7 +70,7 @@ def main()
 
   # Enroll all students into all of their preferences.
   process_courses(constraint_file_name, courses, courses_hash)
-  process_students(pref_file_name, students, courses, courses_hash)
+  process_students(pref_file_name, students, courses_hash)
 
   # Unenroll from courses until there are no overenrolled students remaining.
   unenroll_above_max(courses, students, courses_hash)
@@ -211,7 +211,7 @@ end
 # Reads in all student preference entries from the provided CSV filename. 
 # Creates and enrolls each Student object into all of their preferences,
 # storing them into the provided array for later use in the algorithm.
-def process_students(file_name, students, courses, courses_hash)
+def process_students(file_name, students, courses_hash)
 
   header_read = false
   CSV.foreach("./#{file_name}") { |row|
@@ -229,7 +229,7 @@ def process_students(file_name, students, courses, courses_hash)
     end
 
     # Create the Student object.
-    addedStudent = Student.new(row, courses, courses_hash)
+    addedStudent = Student.new(row)
 
     # Enroll the student in all of their preferences.
     addedStudent.enroll(addedStudent.prefs, courses_hash)
