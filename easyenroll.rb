@@ -238,7 +238,7 @@ def process_students(file_name, students, courses_hash)
     end
 
     # Create the Student object.
-    addedStudent = Student.new(row)
+    addedStudent = Student.new(row, courses_hash)
 
     # Enroll the student in all of their preferences.
     addedStudent.enroll(addedStudent.prefs, courses_hash)

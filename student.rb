@@ -16,7 +16,7 @@ class Student
   attr_accessor :enrolled_courses, :reasons, :priority
 
   # Initializes the Student using a row from the CSV file.
-  def initialize(student_info)
+  def initialize(student_info, courses_hash)
 
     # Variables straight from CSV file.
     @student_id = student_info[0]
@@ -26,7 +26,7 @@ class Student
 
     # Values are formatted first via method calls.
     @courses_taken = split_taken(student_info[2])
-    @prefs = merge_prefs(student_info[5], student_info[6], student_info[7])
+    @prefs = merge_prefs(student_info[5], student_info[6], student_info[7], courses_hash)
 
     # Variables NOT from the CSV file.
     @enrolled_courses = []
@@ -49,13 +49,17 @@ class Student
 
   # Returns an array of strings representing course preferences
   # of the student, omitting the "N/A"s.
-  def merge_prefs(pref1, pref2, pref3)
-    unfiltered = [pref1, pref2, pref3]
+  def merge_prefs(pref1, pref2, pref3, courses_hash)
+    
+    # We should ignore any duplicate preferences.
+    unfiltered = [pref1, pref2, pref3].uniq()
     
     # Only keeps the non-"N/A" values.
     filtered = []
     unfiltered.each { |pref|
-      if (pref) && (not pref == "N/A")
+
+      # Added as long as the user's preference is in the course constraints file.
+      if (pref) && (not pref == "N/A") && (courses_hash[pref])
         filtered.push(pref)
       end
     }
