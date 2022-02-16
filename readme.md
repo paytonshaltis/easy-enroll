@@ -30,7 +30,7 @@ ENROLLEMNT TOTALS
 
 The program will run, and the output files will be created with the names that you have given them. Note that if you want them to have the `.csv` extension, you must explicitly include it in the name of your output file.
 
-Additionally, some information will be printed to the standary output that gives some insight as to how well the scheduling algorithm was able to place students into courses.
+Additionally, some information will be printed to the standard output that gives some insight as to how well the scheduling algorithm was able to place students into courses.
 
 ## Assumptions Made:
 
