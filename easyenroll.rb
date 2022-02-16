@@ -11,72 +11,34 @@ require "./course"
 
 def main()
   
-  # Input and output file names.
-  pref_file_name = ""
-  constraint_file_name = ""
-  student_output_file_name = ""
-  course_output_file_name = ""
+  # Retrieves the names of the input / output files.
+  constraint_file_name = get_course_input_file()
+  pref_file_name = get_student_input_file()
+  course_output_file_name = get_course_output_file()
+  student_output_file_name = get_student_output_file(course_output_file_name)
 
-  # Data structures used for keeping track of all students and courses.
+  # Arrays used for keeping track of all students and courses.
   courses = []
   students = []
 
   # Hashes String => Course.
   courses_hash = {}
-
-  # Get the name of the constraints input file.
-  puts "Enter course constraints input file name:"
-  while true
-
-    constraint_file_name = gets().chomp()
-    if not File.file?(constraint_file_name)
-      puts "File does not exist. Enter a valid file name:"
-    else
-      break
-    end
-
-  end
   
-  # Get the name of the preferences input file.
-  puts "Enter student preference input file name:"
-  while true
+  # Performs the scheduling algorithm for the given input files.
+  schedule_students(students, courses, courses_hash, constraint_file_name, pref_file_name)
 
-    pref_file_name = gets().chomp()
-    if not File.file?(pref_file_name)
-      puts "File does not exist. Enter a valid file name:"
-    else
-      break
-    end
+  # Write to the output files using the user's desired file names.
+  write_course_output(courses, course_output_file_name)
+  write_student_output(students, student_output_file_name)
 
-  end
+  # Print the enrollment statistics
+  print_statistics(students)
 
-  # Gets the name of the courses output file.
-  puts "Enter course output file name (will be overwritten if it already exists):"
-  while true
-    
-    course_output_file_name = gets().chomp()
-    if course_output_file_name == ""
-      puts "Output file name cannot be blank. Enter a valid file name:"
-    else
-      break
-    end
+end
 
-  end
-
-  # Gets the name of the students output file.
-  puts "Enter student output file name (will be overwritten if it already exists):"
-  while true
-    
-    student_output_file_name = gets().chomp()
-    if student_output_file_name == course_output_file_name
-      puts "Output file names must not be the same. Enter a valid file name:"
-    elsif student_output_file_name == ""
-      puts "Output file name cannot be blank. Enter a valid file name:"
-    else
-      break
-    end
-
-  end
+# Performs the main scheduling algorithm to enroll students into their 
+# preferred courses.
+def schedule_students(students, courses, courses_hash, constraint_file_name, pref_file_name)
 
   # Enroll all students into all of their preferences.
   process_courses(constraint_file_name, courses, courses_hash)
@@ -104,85 +66,93 @@ def main()
   # Check for one final course-section revival using the remaining students.
   not_enrolled = []
   single_enrolled = []
-  students.each { |student|
-    
-    if student.enrolled_courses().size() == 0 && (student.num_requests() >= 1 && student.prefs().size() >= 1)
-      not_enrolled.push(student)
-    elsif student.enrolled_courses().size() == 1 && (student.num_requests() == 2 && student.prefs().size() >= 2)
-      single_enrolled.push(student)
-    end
-
-  }
+  gather_underenrolled(students, not_enrolled, single_enrolled)
   revive_courses(courses, courses_hash, not_enrolled, single_enrolled)
 
   # Add resons to each student who is not enrolled in their max courses.
   create_reasons(courses_hash, students)
 
-  # Write the courses to the desired output file.
-  CSV.open(course_output_file_name, "w") { |csv|
-    csv.puts(["Course Number", "Section Number", "IDs of Students to be Enrolled in this Course/Section", "Number of seats filled", "Number of open seats", "Can run?"])
-    courses.each { |course|
-      
-      # Add the course's running sections first.
-      for i in (1..course.curr_num_sections()) do
-        csv.puts(course.to_csv(i))
-      end
+end
 
-      # Add the course's non-running sections next.
-      for i in (course.curr_num_sections()...course.init_num_sections())
-        csv.puts([course.course_number(), "0#{i + 1}", "None", 0, course.max(), "No"])
-      end
+# Returns the name of the course constraints input file.
+def get_course_input_file()
 
-    }
-  }
+  # Prompts until valid file name is provided.
+  puts "Enter course constraints input file name:"
+  while true
 
-  # Write the students to the desired output file.
-  CSV.open(student_output_file_name, "w") { |csv|
-    csv.puts(["Student ID", "Courses in which enrolled", "Reason"])
-    students.each { |student|
-      csv.puts(student.to_csv())
-    }
-  }
-
-  # Tally up the totals for enrolled and unenrolled students.
-  enrolled_2_2 = 0
-  enrolled_1_2 = 0
-  enrolled_0_2 = 0
-  enrolled_1_1 = 0
-  enrolled_0_1 = 0
-  enrolled_0_0 = 0
-  enrolled_m_l = 0
-  students.each { |student|
-    
-    if student.enrolled_courses().size() == 2
-      enrolled_2_2 += 1
-    elsif student.enrolled_courses().size() == 1 && student.num_requests() == 2 && student.prefs.size() >= 2
-      enrolled_1_2 += 1
-    elsif student.enrolled_courses().size() == 1 && student.num_requests() == 1
-      enrolled_1_1 += 1
-    elsif student.enrolled_courses().size() == 0 && student.num_requests() == 1 && student.prefs.size() >= 1
-      enrolled_0_1 += 1
-    elsif student.enrolled_courses().size() == 0 && student.num_requests() == 2 && student.prefs.size() >= 2
-      enrolled_0_2 += 1
-    elsif student.num_requests() == 0
-      enrolled_0_0 += 1
-    elsif student.num_requests() > student.prefs().size()
-      enrolled_m_l += 1
+    constraint_file_name = gets().chomp()
+    if not File.file?(constraint_file_name)
+      puts "File does not exist. Enter a valid file name:"
+    else
+      break
     end
 
-  }
+  end
 
-  # Print out the final statistics to the standard output.
-  puts "=============================="
-  puts "ENROLLMENT TOTALS:"
-  puts "Students enrolled in 2/2 courses: #{enrolled_2_2}"
-  puts "Students enrolled in 1/2 courses: #{enrolled_1_2}"
-  puts "Students enrolled in 0/2 courses: #{enrolled_0_2}"
-  puts "Students enrolled in 1/1 courses: #{enrolled_1_1}"
-  puts "Students enrolled in 0/1 courses: #{enrolled_0_1}"
-  puts "Students who requested 0 courses: #{enrolled_0_0}"
-  puts "Students who requested more courses than preferences: #{enrolled_m_l}"
-  puts "TOTAL: #{enrolled_2_2 + enrolled_1_2 + enrolled_0_2 + enrolled_1_1 + enrolled_0_1 + enrolled_0_0 + enrolled_m_l}"
+  return constraint_file_name
+
+end
+
+# Returns the name of the student preferences input file.
+def get_student_input_file()
+
+  # Prompts until valid file name is provided.
+  puts "Enter student preference input file name:"
+  while true
+
+    pref_file_name = gets().chomp()
+    if not File.file?(pref_file_name)
+      puts "File does not exist. Enter a valid file name:"
+    else
+      break
+    end
+
+  end
+
+  return pref_file_name
+
+end
+
+# Returns the name of the course enrollment output file.
+def get_course_output_file()
+
+  # Prompts until valid file name is provided.
+  puts "Enter course output file name (will be overwritten if it already exists):"
+  while true
+    
+    course_output_file_name = gets().chomp()
+    if course_output_file_name == ""
+      puts "Output file name cannot be blank. Enter a valid file name:"
+    else
+      break
+    end
+
+  end
+
+  return course_output_file_name
+
+end
+
+# Returns the name of the student enrollment output file.
+def get_student_output_file(course_output_file_name)
+
+  # Prompts until valid file name is provided.
+  puts "Enter student output file name (will be overwritten if it already exists):"
+  while true
+    
+    student_output_file_name = gets().chomp()
+    if student_output_file_name == course_output_file_name
+      puts "Output file names must not be the same. Enter a valid file name:"
+    elsif student_output_file_name == ""
+      puts "Output file name cannot be blank. Enter a valid file name:"
+    else
+      break
+    end
+
+  end
+
+  return student_output_file_name
 
 end
 
@@ -516,6 +486,23 @@ def revive_courses(courses, courses_hash, not_enrolled, single_enrolled)
 
 end
 
+# Gathers the underenrolled students and puts them in the appropriate array
+# provided in the parameters.
+def gather_underenrolled(students, not_enrolled, single_enrolled)
+
+  # Traverse through the students array.
+  students.each { |student|
+    
+    if student.enrolled_courses().size() == 0 && (student.num_requests() >= 1 && student.prefs().size() >= 1)
+      not_enrolled.push(student)
+    elsif student.enrolled_courses().size() == 1 && (student.num_requests() == 2 && student.prefs().size() >= 2)
+      single_enrolled.push(student)
+    end
+
+  }
+
+end  
+
 # Kicks as many students as needed from courses who are above their maximum
 # number of students, organizing the type of student that was kicked into
 # one of two arrays: not_enrolled or single_enrolled.
@@ -821,6 +808,87 @@ def create_reasons(courses_hash, students)
     }
     
   }
+
+end
+
+# Writes to the course enrollment output file.
+def write_course_output(courses, course_output_file_name)
+
+  # Use the output file name provided by the user.
+  CSV.open(course_output_file_name, "w") { |csv|
+    csv.puts(["Course Number", "Section Number", "IDs of Students to be Enrolled in this Course/Section", "Number of seats filled", "Number of open seats", "Can run?"])
+    courses.each { |course|
+      
+      # Add the course's running sections first.
+      for i in (1..course.curr_num_sections()) do
+        csv.puts(course.to_csv(i))
+      end
+
+      # Add the course's non-running sections next.
+      for i in (course.curr_num_sections()...course.init_num_sections())
+        csv.puts([course.course_number(), "0#{i + 1}", "None", 0, course.max(), "No"])
+      end
+
+    }
+  }
+
+end
+
+# Writes to the student enrollment output file.
+def write_student_output(students, student_output_file_name)
+
+  # Use the output file name provided by the user.
+  CSV.open(student_output_file_name, "w") { |csv|
+    csv.puts(["Student ID", "Courses in which enrolled", "Reason"])
+    students.each { |student|
+      csv.puts(student.to_csv())
+    }
+  }
+
+end
+
+# Print enrollment statistics to the standard output.
+def print_statistics(students)
+
+  # Tally up the totals for enrolled and unenrolled students.
+  enrolled_2_2 = 0
+  enrolled_1_2 = 0
+  enrolled_0_2 = 0
+  enrolled_1_1 = 0
+  enrolled_0_1 = 0
+  enrolled_0_0 = 0
+  enrolled_m_l = 0
+  students.each { |student|
+    
+    if student.enrolled_courses().size() == 2
+      enrolled_2_2 += 1
+    elsif student.enrolled_courses().size() == 1 && student.num_requests() == 2 && student.prefs.size() >= 2
+      enrolled_1_2 += 1
+    elsif student.enrolled_courses().size() == 1 && student.num_requests() == 1
+      enrolled_1_1 += 1
+    elsif student.enrolled_courses().size() == 0 && student.num_requests() == 1 && student.prefs.size() >= 1
+      enrolled_0_1 += 1
+    elsif student.enrolled_courses().size() == 0 && student.num_requests() == 2 && student.prefs.size() >= 2
+      enrolled_0_2 += 1
+    elsif student.num_requests() == 0
+      enrolled_0_0 += 1
+    elsif student.num_requests() > student.prefs().size()
+      enrolled_m_l += 1
+    end
+
+  }
+
+  # Print out the final statistics to the standard output.
+  puts "=============================="
+  puts "ENROLLMENT TOTALS:"
+  puts "Students enrolled in 2/2 courses: #{enrolled_2_2}"
+  puts "Students enrolled in 1/2 courses: #{enrolled_1_2}"
+  puts "Students enrolled in 0/2 courses: #{enrolled_0_2}"
+  puts "Students enrolled in 1/1 courses: #{enrolled_1_1}"
+  puts "Students enrolled in 0/1 courses: #{enrolled_0_1}"
+  puts "Students who requested 0 courses: #{enrolled_0_0}"
+  puts "Students who requested more courses than preferences: #{enrolled_m_l}"
+  puts "TOTAL: #{enrolled_2_2 + enrolled_1_2 + enrolled_0_2 + enrolled_1_1 + enrolled_0_1 + enrolled_0_0 + enrolled_m_l}"
 
 end
 
