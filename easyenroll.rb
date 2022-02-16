@@ -1,9 +1,9 @@
 # Name: Payton Shaltis
 # Project name: Assignment 1: EasyEnroll
-# Description: An algorithm that determines the best college course enrollment strategy according to a set of student preferences and course constraings.
+# Description: An algorithm that determines the best college course enrollment strategy according to a set of student preferences and course constraints.
 # Filename: easyenroll.rb
 # Description: Contains the main() method with the actual algorithm implementation.
-# Last modified on: February 15, 2022
+# Last modified on: February 16, 2022
 
 require "csv"
 require "./student"
@@ -20,12 +20,9 @@ def main()
   # Arrays used for keeping track of all students and courses.
   courses = []
   students = []
-
-  # Hashes String => Course.
-  courses_hash = {}
   
   # Performs the scheduling algorithm for the given input files.
-  schedule_students(students, courses, courses_hash, constraint_file_name, pref_file_name)
+  schedule_students(students, courses, constraint_file_name, pref_file_name)
 
   # Write to the output files using the user's desired file names.
   write_course_output(courses, course_output_file_name)
@@ -38,7 +35,10 @@ end
 
 # Performs the main scheduling algorithm to enroll students into their 
 # preferred courses.
-def schedule_students(students, courses, courses_hash, constraint_file_name, pref_file_name)
+def schedule_students(students, courses, constraint_file_name, pref_file_name)
+
+  # Hashes String => Course.
+  courses_hash = {}
 
   # Enroll all students into all of their preferences.
   process_courses(constraint_file_name, courses, courses_hash)

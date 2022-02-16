@@ -1,9 +1,9 @@
 # Name: Payton Shaltis
 # Project name: Assignment 1: EasyEnroll
-# Description: An algorithm that determines the best college course enrollment strategy according to a set of student preferences and course constraings.
+# Description: An algorithm that determines the best college course enrollment strategy according to a set of student preferences and course constraints.
 # Filename: course.rb
 # Description: Contains the class implementation for representing Courses.
-# Last modified on: February 15, 2022
+# Last modified on: February 16, 2022
 
 # Course class for representing courses.
 class Course
@@ -98,7 +98,7 @@ class Course
     # Calculate the number of open seats in this section
     open_seats = @max - seats_filled
 
-    [@course_number, "0#{section_number.to_s()}", student_ids, seats_filled, open_seats, "Yes"]
+    return [@course_number, "0#{section_number.to_s()}", student_ids, seats_filled, open_seats, "Yes"]
   end
 
 end
