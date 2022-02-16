@@ -3,7 +3,7 @@
 # Description: An algorithm that determines the best college course enrollment strategy according to a set of student preferences and course constraings.
 # Filename: easyenroll.rb
 # Description: Contains the main() method with the actual algorithm implementation.
-# Last modified on: February 13, 2022
+# Last modified on: February 15, 2022
 
 require "csv"
 require "./student"

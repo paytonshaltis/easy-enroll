@@ -3,7 +3,7 @@
 # Description: An algorithm that determines the best college course enrollment strategy according to a set of student preferences and course constraings.
 # Filename: course.rb
 # Description: Contains the class implementation for representing Courses.
-# Last modified on: February 13, 2022
+# Last modified on: February 15, 2022
 
 # Course class for representing courses.
 class Course
