@@ -121,13 +121,14 @@ def get_course_output_file()
 
   # Prompts until valid file name is provided.
   puts "Enter course output file name (will be overwritten if it already exists):"
-  while true
+  file_exists = false;
+  while !file_exists
     
     course_output_file_name = gets().chomp()
     if course_output_file_name == ""
       puts "Output file name cannot be blank. Enter a valid file name:"
     else
-      break
+      file_exists = true;
     end
 
   end
@@ -141,7 +142,8 @@ def get_student_output_file(course_output_file_name)
 
   # Prompts until valid file name is provided.
   puts "Enter student output file name (will be overwritten if it already exists):"
-  while true
+  file_exists = false;
+  while !file_exists
     
     student_output_file_name = gets().chomp()
     if student_output_file_name == course_output_file_name
@@ -149,7 +151,7 @@ def get_student_output_file(course_output_file_name)
     elsif student_output_file_name == ""
       puts "Output file name cannot be blank. Enter a valid file name:"
     else
-      break
+      file_exists = true;
     end
 
   end
