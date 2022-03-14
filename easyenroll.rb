@@ -79,14 +79,14 @@ def get_course_input_file()
 
   # Prompts until valid file name is provided.
   puts "Enter course constraints input file name:"
-  file_entered = false;
-  while !file_entered
+  file_exists = false;
+  while !file_exists
 
     constraint_file_name = gets().chomp()
     if not File.file?(constraint_file_name)
       puts "File does not exist. Enter a valid file name:"
     else
-      file_entered = true;
+      file_exists = true;
     end
 
   end
@@ -100,14 +100,14 @@ def get_student_input_file()
 
   # Prompts until valid file name is provided.
   puts "Enter student preference input file name:"
-  file_entered = false;
-  while !file_entered
+  file_exists = false;
+  while !file_exists
 
     pref_file_name = gets().chomp()
     if not File.file?(pref_file_name)
       puts "File does not exist. Enter a valid file name:"
     else
-      file_entered = true;
+      file_exists = true;
     end
 
   end
