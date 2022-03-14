@@ -3,10 +3,8 @@
 
 ## (NEW) Resubmission Revisions:
 - Removed 'magic numbers' from the 'student.rb' file. These were initially used to calculate student priority and have since been replaced with descriptive constants.
--
--
--
--
+- Replaced all occurrences of 'next' and 'break' from the 'easyenroll.rb' source file. They were either replaced with (a) existing counter variables, (b) existing boolean variables, or (c) new boolean variables.
+    - Functionality is still identical, but tracing code is much easier.
 
 ## Files in the Repository:
 - `easyenroll.rb` - The 'driver' file with the main method. Contains the code for the actual scheduling algorithm itself.

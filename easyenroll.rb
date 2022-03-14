@@ -717,7 +717,7 @@ def single_swap_double(courses, courses_hash, not_enrolled, single_enrolled)
 
       # If a course has a spot open, and the student is not
       # already enrolled in this course, enroll the student.
-      if (courses_hash[pref].enrolled_students().size() < courses_hash[pref].total_max()) && (not student.enrolled_courses().include?(pref))
+      if !done_checking && (courses_hash[pref].enrolled_students().size() < courses_hash[pref].total_max()) && (not student.enrolled_courses().include?(pref))
         
         # Mark the student to be removed from their array.
         remove_from_single_enrolled.push(student)
@@ -727,54 +727,53 @@ def single_swap_double(courses, courses_hash, not_enrolled, single_enrolled)
 
         # We are done with this student now.
         done_checking = true
-        break
 
       end
 
     }
 
-    # See if we were able to just add the student.
-    if done_checking
-      next
-    end
+    # Only continue if the student was not able to be added.
+    if !done_checking
 
-    # If the student could not just be added, look for students to swap.
-    student.prefs.each { |pref|
+      # If the student could not just be added, look for students to swap.
+      student.prefs.each { |pref|
 
-      # Get the lowest priority student in this preference if the student is not
-      # already enrolled in this course.
-      if not student.enrolled_courses.include?(pref)
-        lowest_student = lowest_priority_student(pref, courses_hash, 2)
-      end  
+        # Get the lowest priority student in this preference if the student is not
+        # already enrolled in this course.
+        if not student.enrolled_courses.include?(pref)
+          lowest_student = lowest_priority_student(pref, courses_hash, 2)
+        end  
+        
+        # See if the lowest student found is lower priority than 
+        # the currently marked student.
+        if lowest_student && ((not marked_student) || lowest_student.priority() < marked_student.priority())
+          marked_student = lowest_student
+          marked_course = pref
+        end
+
+      }
+
+      # Here, we must consider student priority. Since the marked student will
+      # lose a class, we need to make sure that they really have a lower 
+      # priority than the student being swapped in.
+      if marked_student && (student.priority() > marked_student.priority())
+
+        # Kick the student from this course, adding them to the appropriate array.
+        marked_student.kick(marked_course, courses_hash)
+        single_enrolled.push(marked_student)
+
+        # Enroll the current student in this course, marking them for 
+        # removal from the not enrolled array.
+        student.enroll(marked_course, courses_hash)
+        remove_from_single_enrolled.push(student)
+
+      else
+
+        # The student could not be enrolled in any additional courses.
+        remove_from_single_enrolled.push(student)
       
-      # See if the lowest student found is lower priority than 
-      # the currently marked student.
-      if lowest_student && ((not marked_student) || lowest_student.priority() < marked_student.priority())
-        marked_student = lowest_student
-        marked_course = pref
       end
 
-    }
-
-    # Here, we must consider student priority. Since the marked student will
-    # lose a class, we need to make sure that they really have a lower 
-    # priority than the student being swapped in.
-    if marked_student && (student.priority() > marked_student.priority())
-
-      # Kick the student from this course, adding them to the appropriate array.
-      marked_student.kick(marked_course, courses_hash)
-      single_enrolled.push(marked_student)
-
-      # Enroll the current student in this course, marking them for 
-      # removal from the not enrolled array.
-      student.enroll(marked_course, courses_hash)
-      remove_from_single_enrolled.push(student)
-
-    else
-
-      # The student could not be enrolled in any additional courses.
-      remove_from_single_enrolled.push(student)
-    
     end
   }
 
@@ -799,7 +798,7 @@ def create_reasons(courses_hash, students)
       student.reasons().push("Requested more courses than preferences.")
     end
 
-    # Next, consider each course that the student had in their preferences.
+    # Then, consider each course that the student had in their preferences.
     student.prefs().each { |pref|
       
       # Only consider students who are enrolled in less courses than
@@ -832,7 +831,7 @@ def write_course_output(courses, course_output_file_name)
         csv.puts(course.to_csv(i))
       end
 
-      # Add the course's non-running sections next.
+      # Add the course's non-running sections second.
       for i in (course.curr_num_sections()...course.init_num_sections())
         csv.puts([course.course_number(), "0#{i + 1}", "None", 0, course.max(), "No"])
       end
