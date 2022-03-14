@@ -329,13 +329,18 @@ def unenroll_max_from_course(course, max_unenrollments, courses_hash)
   # Determine which students will be unenrolled.
   unenrolling = []
   course.enrolled_students().each { |student|
-    if student.overenrolled()
-      unenrolling.push(student)
-      max_unenrollments -= 1
+
+    # If there are more students to unenroll.
+    if max_unenrollments > 0
+
+      # Try unenrolling the current student.
+      if student.overenrolled()
+        unenrolling.push(student)
+        max_unenrollments -= 1
+      end
+
     end
-    if max_unenrollments == 0
-      break
-    end
+
   }
   
   # Unenroll all of the marked students.
