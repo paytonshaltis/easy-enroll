@@ -164,24 +164,26 @@ def process_courses(file_name, courses, courses_hash)
   header_read = false
   CSV.foreach("./#{file_name}") { |row|
 
-    # Should ignore the header row from CSV files.
-    if not header_read
-      header_read = true
-      next
-    end
-
     # See if the user mixed up preferences and constraints.
-    if row[4] != nil
+    if header_read && (row[4] != nil)
       puts "Please make sure you input a CONSTRAINT file and a PREFERENCE file, in that order. Exiting..."
       exit()
     end
 
-    # Add the course to the course list.
-    addedCourse = Course.new(row)
-    courses.push(addedCourse)
+    # If this row is valid and should be read.
+    if header_read
+    
+      # Add the course to the course list.
+      addedCourse = Course.new(row)
+      courses.push(addedCourse)
 
-    # Add the course to the course hash.
-    courses_hash[addedCourse.course_number()] = addedCourse
+      # Add the course to the course hash.
+      courses_hash[addedCourse.course_number()] = addedCourse
+    
+    end
+
+    # After the first row, header has been properly skipped.
+    header_read = true;
 
   }
 
@@ -195,26 +197,28 @@ def process_students(file_name, students, courses_hash)
   header_read = false
   CSV.foreach("./#{file_name}") { |row|
 
-    # Should ignore the header row from CSV files.
-    if not header_read
-      header_read = true
-      next
-    end
-
     # See if the user mixed up preferences and constraints.
     if row[4] == nil
       puts "Please make sure you input a CONSTRAINT file and a PREFERENCE file, in that order. Exiting..."
       exit()
     end
 
-    # Create the Student object.
-    addedStudent = Student.new(row, courses_hash)
+    # If this row is valid and should be read.
+    if header_read
+      
+      # Create the Student object.
+      addedStudent = Student.new(row, courses_hash)
 
-    # Enroll the student in all of their preferences.
-    addedStudent.enroll(addedStudent.prefs, courses_hash)
+      # Enroll the student in all of their preferences.
+      addedStudent.enroll(addedStudent.prefs, courses_hash)
 
-    # Add the student to the array of students.
-    students.push(addedStudent)
+      # Add the student to the array of students.
+      students.push(addedStudent)
+
+    end
+
+    # After the first row, header has been properly skipped.
+    header_read = true
 
   }
 
