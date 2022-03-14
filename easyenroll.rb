@@ -44,6 +44,9 @@ def schedule_students(students, courses, constraint_file_name, pref_file_name)
   process_courses(constraint_file_name, courses, courses_hash)
   process_students(pref_file_name, students, courses_hash)
 
+  # Sort the students in each course's array of enrolled students.
+  Student.sort_students_lth(students, 0, students.size() - 1)
+
   # Unenroll from courses until there are no overenrolled students remaining.
   unenroll_above_max(courses, students, courses_hash)
   unenroll_above_min(courses, students, courses_hash)

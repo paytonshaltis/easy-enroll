@@ -2,9 +2,11 @@
 # Assignment 1 - EasyEnroll
 
 ## (NEW) Resubmission Revisions:
-- Removed 'magic numbers' from the 'student.rb' file. These were initially used to calculate student priority and have since been replaced with descriptive constants.
-- Replaced all occurrences of 'next' and 'break' from the 'easyenroll.rb' source file. They were either replaced with (a) existing counter variables, (b) existing boolean variables, or (c) new boolean variables.
+- Removed 'magic numbers' from the `student.rb` file. These were initially used to calculate student priority and have since been replaced with descriptive constants.
+- Replaced all occurrences of 'next' and 'break' from the `easyenroll.rb` source file. They were either replaced with (a) existing counter variables, (b) existing boolean variables, or (c) new boolean variables.
     - Functionality is still identical, but tracing code is much easier.
+- Implemented quicksorting for students based on priorities to make unenrollment more efficient.
+    - Note that nothing changes in the final results. This is because my algorithm already makes sure to swap lower-priority student for higher-priority ones. The addition of sorting just reduces the amount of swaps that are needed, because lower-priority students are unenrolled first due to sorting.
 
 ## Files in the Repository:
 - `easyenroll.rb` - The 'driver' file with the main method. Contains the code for the actual scheduling algorithm itself.
