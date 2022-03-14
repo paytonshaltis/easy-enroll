@@ -427,26 +427,26 @@ def revive_courses(courses, courses_hash, not_enrolled, single_enrolled)
       # Start with the unenrolled students.
       not_enrolled.each { |student|
         
-        # Only enroll the student if the course is in their preferences.
-        if student.prefs().include?(course.course_number())
-          
-          # Enroll this student in the course.
-          student.enroll(course.course_number(), courses_hash)
+        # See if the course section is full before adding students.
+        if total_added != course.max()
 
-          # Subtract one from all of their prefs in the hash.
-          student.prefs().each { |pref|
-            prefs_hash[pref] -= 1
-          }
+          # Only enroll the student if the course is in their preferences.
+          if student.prefs().include?(course.course_number())
+            
+            # Enroll this student in the course.
+            student.enroll(course.course_number(), courses_hash)
 
-          # Mark the student to be removed from this array.
-          remove_from_not_enrolled.push(student)
-          total_added += 1
+            # Subtract one from all of their prefs in the hash.
+            student.prefs().each { |pref|
+              prefs_hash[pref] -= 1
+            }
 
-        end
+            # Mark the student to be removed from this array.
+            remove_from_not_enrolled.push(student)
+            total_added += 1
 
-        # See if the course section is now full.
-        if total_added == course.max()
-          break
+          end
+
         end
 
       }
@@ -456,34 +456,29 @@ def revive_courses(courses, courses_hash, not_enrolled, single_enrolled)
         not_enrolled.delete(student)
       }
 
-      # See if we shold continue adding students.
-      if total_added == course.max()
-        break
-      end
-
       # Continue with the single enrolled students.
       single_enrolled.each { |student|
 
-        # Make sure that they aren't already enrolled in this course.
-        if student.prefs().include?(course.course_number()) && (not student.enrolled_courses().include?(course.course_number()))
-          
-          # Enroll this student in the course.
-          student.enroll(course.course_number(), courses_hash)
+        # See if the course section is full before adding students.
+        if total_added != course.max()
 
-          # Subtract one from all of their prefs.
-          student.prefs().each { |pref|
-            prefs_hash[pref] -= 1
-          }
+          # Make sure that they aren't already enrolled in this course.
+          if student.prefs().include?(course.course_number()) && (not student.enrolled_courses().include?(course.course_number()))
+            
+            # Enroll this student in the course.
+            student.enroll(course.course_number(), courses_hash)
 
-          # Mark the student to be removed from this array.
-          remove_from_single_enrolled.push(student)
-          total_added += 1
+            # Subtract one from all of their prefs.
+            student.prefs().each { |pref|
+              prefs_hash[pref] -= 1
+            }
 
-        end
+            # Mark the student to be removed from this array.
+            remove_from_single_enrolled.push(student)
+            total_added += 1
 
-        # See if the course section is now full.
-        if total_added == course.max()
-          break
+          end
+
         end
 
       }
