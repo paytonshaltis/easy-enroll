@@ -1,6 +1,13 @@
 #### Payton Shaltis CSC-415-01
 # Assignment 1 - EasyEnroll
 
+## (NEW) Resubmission Revisions:
+- Removed 'magic numbers' from the 'student.rb' file. These were initially used to calculate student priority and have since been replaced with descriptive constants.
+-
+-
+-
+-
+
 ## Files in the Repository:
 - `easyenroll.rb` - The 'driver' file with the main method. Contains the code for the actual scheduling algorithm itself.
 - `student.rb` - The implementation of the 'Student' class for representing individual student instances.
