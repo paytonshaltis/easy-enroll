@@ -8,6 +8,19 @@
 # Student class for representing students.
 class Student
 
+  # Constants used for calculating student priority.
+  TOTAL_SEMESTERS = 8
+  MAX_REQUESTED_COURSES = 3
+
+  CLASS_PRIORITY = 10000
+  SEMESTER_PRIORITY = 1000
+  COURSES_TAKEN_PRIORITY = 10
+
+  SENIOR_MULTIPLIER = 4
+  JUNIOR_MULTIPLIER = 3
+  SOPHOMORE_MULTIPLIER = 2
+  FIRST_YEAR_MULTIPLIER = 1
+
   # Read / write instance variables from CSV.
   attr_accessor :student_id, :student_year, :courses_taken, 
     :semesters_left, :num_requests, :prefs
@@ -78,25 +91,25 @@ class Student
     # The first digit represents the class level.
     case @student_year
     when "Senior"
-      @priority += 40000
+      @priority += CLASS_PRIORITY * SENIOR_MULTIPLIER
     when "Junior"
-      @priority += 30000
+      @priority += CLASS_PRIORITY * JUNIOR_MULTIPLIER
     when "Sophomore"
-      @priority += 20000
+      @priority += CLASS_PRIORITY * SOPHOMORE_MULTIPLIER
     when "First year student"
-      @priority += 10000
+      @priority += CLASS_PRIORITY * FIRST_YEAR_MULTIPLIER
     end
 
     # The second digit represents semesters taken.
-    @priority += (8 - @semesters_left) * 1000
+    @priority += SEMESTER_PRIORITY * (TOTAL_SEMESTERS - @semesters_left)
 
     # The third and fourth digits represent courses taken.
-    @priority += @courses_taken.uniq().size() * 10
+    @priority += COURSES_TAKEN_PRIORITY * @courses_taken.uniq().size()
 
     # The fifth digit represents if the student selected the
     # maximum number of courses that they could.
-    if (@prefs.size() == 3) || (@courses_taken.uniq().size() + @prefs.size() == Course.total_courses())
-      @priority += 3
+    if (@prefs.size() == MAX_REQUESTED_COURSES) || (@courses_taken.uniq().size() + @prefs.size() == Course.total_courses())
+      @priority += MAX_REQUESTED_COURSES
     else
       @priority += (@prefs.size())
     end
@@ -207,6 +220,56 @@ class Student
 
     # Return the CSV-formatted array representation of a Student.
     return [@student_id, enrolled_string, reason_string]
+  end
+
+  # Sorts an array of students in place from lowest priority to 
+  # highest priority using quicksort.
+  def Student.sort_students_lth(students, front, back)
+    
+    # Recursive case for quicksort.
+    if front < back
+      mid = Student.partition(students, front, back)
+      Student.sort_students_lth(students, front, mid - 1)
+      Student.sort_students_lth(students, mid + 1, back)
+    end
+
+  end
+
+  # Partition helper method for quicksortings students.
+  def Student.partition(students, front, back)
+    
+    pivot = students[back]    # Pivot starts as the last student.
+    index = front;            # Begin out linear scan at the front.
+    pivot_index = front;      # Position of pivot starts at the front.
+
+    # Pseudo-sort of the current partition.
+    while index < back
+      
+      # Comparison based off of student priorities.
+      if students[index].priority <= pivot.priority
+        
+        # Swap the two students.
+        temp = students[index]
+        students[index] = students[pivot_index]
+        students[pivot_index] = temp
+
+        # Increment the pivot_index position.
+        pivot_index += 1
+      
+      end
+
+      index += 1
+    
+    end
+
+    # Moves 'pivot' to its correct position
+    temp = students[pivot_index]
+    students[pivot_index] = students[back]
+    students[back] = temp
+    
+    # Pivot is in its correct position.
+    return pivot_index
+
   end
 
 end
